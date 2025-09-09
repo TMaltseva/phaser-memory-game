@@ -16,7 +16,23 @@ class GameScene extends Phaser.Scene {
   create() {
     this.createBackground();
     this.createCards();
+    this.start();
+  }
+
+  start() {
     this.openedCard = null;
+    this.openedCardsCount = 0;
+    this.initCards();
+  }
+
+  initCards() {
+    let positions = this.getCardsPositions();
+
+    this.cards.forEach((card) => {
+      let position = positions.pop();
+      card.close();
+      card.setPosition(position.x, position.y);
+    });
   }
 
   createBackground() {
@@ -25,19 +41,17 @@ class GameScene extends Phaser.Scene {
 
   createCards() {
     this.cards = [];
-    let positions = this.getCardPositions();
-    Phaser.Utils.Array.Shuffle(positions);
 
     for (let value of config.cards) {
       for (let i = 0; i < 2; i += 1) {
-        this.cards.push(new Card(this, value, positions.pop()));
+        this.cards.push(new Card(this, value));
       }
     }
 
     this.input.on("gameobjectdown", this.onCardClicked, this);
   }
 
-  getCardPositions() {
+  getCardsPositions() {
     let positions = [];
     let cardTexture = this.textures.get("card").getSourceImage();
     let cardWidth = cardTexture.width + 4;
@@ -54,7 +68,7 @@ class GameScene extends Phaser.Scene {
       }
     }
 
-    return positions;
+    return Phaser.Utils.Array.Shuffle(positions);
   }
 
   onCardClicked(_pointer, card) {
@@ -63,6 +77,7 @@ class GameScene extends Phaser.Scene {
     if (this.openedCard) {
       if (this.openedCard.value === card.value) {
         this.openedCard = null;
+        this.openedCardsCount += 1;
       } else {
         this.openedCard.close();
         this.openedCard = card;
@@ -72,5 +87,9 @@ class GameScene extends Phaser.Scene {
     }
 
     card.open();
+
+    if (this.openedCardsCount === this.cards.length / 2) {
+      this.start();
+    }
   }
 }
