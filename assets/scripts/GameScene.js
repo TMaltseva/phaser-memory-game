@@ -13,7 +13,29 @@ class GameScene extends Phaser.Scene {
     this.load.image("card5", "assets/sprites/card5.png");
   }
 
+  onTimerTick() {
+    // console.log((this.timeout -= 1));
+    this.timeoutText.setText("Time: " + this.timeout);
+
+    if (this.timeout <= 0) {
+      this.start();
+    } else {
+      this.timeout -= 1;
+    }
+  }
+
+  createTimer() {
+    this.time.addEvent({
+      delay: 1000,
+      callback: this.onTimerTick,
+      loop: true,
+      callbackScope: this,
+    });
+  }
+
   create() {
+    this.timeout = config.timeout;
+    this.createTimer();
     this.createBackground();
     this.createText();
     this.createCards();
@@ -21,13 +43,14 @@ class GameScene extends Phaser.Scene {
   }
 
   createText() {
-    this.timeoutText = this.add.text(20, 330, "Time:", {
-      font: "36px GardenFlower",
+    this.timeoutText = this.add.text(20, 30, "", {
+      font: "32px GardenFlower",
       fill: "#ffffff",
     });
   }
 
   start() {
+    this.timeout = config.timeout;
     this.openedCard = null;
     this.openedCardsCount = 0;
     this.initCards();
