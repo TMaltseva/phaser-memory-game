@@ -16,6 +16,31 @@ class GameScene extends Phaser.Scene {
     this.load.audio("success", "assets/sounds/success.mp3");
     this.load.audio("complete", "assets/sounds/complete.mp3");
     this.load.audio("timeout", "assets/sounds/timeout.mp3");
+    this.load.image("modalBg", "assets/sprites/modal-bg.png");
+  }
+
+  getCurrentLevel() {
+    return config.levels[config.currentLevel - 1];
+  }
+
+  nextLevel() {
+    this.timer.paused = true;
+
+    if (config.currentLevel < config.levels.length) {
+      this.scene.pause();
+      this.scene.launch("LevelComplete", {
+        message: "Level Complete!",
+        isGameComplete: false,
+      });
+      config.currentLevel += 1;
+    } else {
+      this.scene.pause();
+      this.scene.launch("LevelComplete", {
+        message: "You Win!",
+        isGameComplete: true,
+      });
+      config.currentLevel = 1;
+    }
   }
 
   onTimerTick() {
@@ -56,12 +81,11 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.timeout = config.timeout;
     this.createSounds();
     this.createTimer();
     this.createBackground();
     this.createText();
-    this.createCards();
+    this.input.on("gameobjectdown", this.onCardClicked, this);
     this.start();
   }
 
@@ -70,14 +94,27 @@ class GameScene extends Phaser.Scene {
       font: "32px GardenFlower",
       fill: "#ffffff",
     });
+
+    this.levelText = this.add.text(20, 70, "", {
+      font: "32px GardenFlower",
+      fill: "#ffffff",
+    });
+  }
+
+  updateTexts() {
+    this.timeoutText.setText("Time: " + this.timeout);
+    this.levelText.setText("Level: " + config.currentLevel);
   }
 
   start() {
     this.initCardsPositions();
-    this.timeout = config.timeout;
+    const level = this.getCurrentLevel();
+    this.timeout = level.time;
     this.openedCard = null;
     this.openedCardsCount = 0;
     this.timer.paused = false;
+    this.updateTexts();
+    this.createCards();
     this.initCards();
     this.showCards();
   }
@@ -125,34 +162,38 @@ class GameScene extends Phaser.Scene {
   }
 
   createCards() {
-    this.cards = [];
+    if (this.cards) {
+      this.cards.forEach((card) => card.destroy());
+    }
 
-    for (let value of config.cards) {
-      for (let i = 0; i < 2; i += 1) {
+    this.cards = [];
+    const level = this.getCurrentLevel();
+
+    for (let value = 1; value <= level.pairs; value += 1) {
+      for (let i = 0; i < 2; i++) {
         this.cards.push(new Card(this, value));
       }
     }
-
-    this.input.on("gameobjectdown", this.onCardClicked, this);
   }
 
   initCardsPositions() {
     let positions = [];
+    const level = this.getCurrentLevel();
+    const grid = calculateGrid(level.pairs);
+
     let cardTexture = this.textures.get("card").getSourceImage();
     let cardWidth = cardTexture.width + 4;
     let cardHeight = cardTexture.height + 4;
     let offsetX =
-      (this.sys.game.config.width - cardWidth * config.cols) / 2 +
-      cardWidth / 2;
+      (this.sys.game.config.width - cardWidth * grid.cols) / 2 + cardWidth / 2;
     let offsetY =
-      (this.sys.game.config.height - cardHeight * config.rows) / 2 +
+      (this.sys.game.config.height - cardHeight * grid.rows) / 2 +
       cardHeight / 2;
     let id = 0;
 
-    for (let row = 0; row < config.rows; row += 1) {
-      for (let col = 0; col < config.cols; col += 1) {
-        id += 1;
-
+    for (let row = 0; row < grid.rows; row++) {
+      for (let col = 0; col < grid.cols; col++) {
+        id++;
         positions.push({
           delay: id * 100,
           x: offsetX + col * cardWidth,
@@ -187,7 +228,7 @@ class GameScene extends Phaser.Scene {
     card.open(() => {
       if (this.openedCardsCount === this.cards.length / 2) {
         this.sounds.complete.play();
-        this.restart();
+        this.nextLevel();
       }
     });
   }
