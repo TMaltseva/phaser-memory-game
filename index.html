@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="assets/icons/favicon.ico">
     <title>Memory Game</title>
     <style>
@@ -10,6 +10,7 @@
             padding: 0;
             margin: 0;
             overflow: hidden;
+            background-color: #1a1a1a;
         }
         @font-face {
             font-family: 'GardenFlower';
@@ -19,6 +20,11 @@
             font-family: 'GardenFlower';
             position: absolute;
             left: -100px;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            touch-action: manipulation;
         }
     </style>
 </head>
