@@ -31,6 +31,8 @@ class GameScene extends Phaser.Scene {
       this.scene.launch("LevelComplete", {
         message: "Level Complete!",
         isGameComplete: false,
+        levelScore: this.levelScore,
+        totalScore: this.totalScore,
       });
       config.currentLevel += 1;
     } else {
@@ -38,6 +40,8 @@ class GameScene extends Phaser.Scene {
       this.scene.launch("LevelComplete", {
         message: "You Win!",
         isGameComplete: true,
+        levelScore: this.levelScore,
+        totalScore: this.totalScore,
       });
       config.currentLevel = 1;
     }
@@ -81,6 +85,7 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.totalScore = 0;
     this.createSounds();
     this.createTimer();
     this.createBackground();
@@ -99,11 +104,19 @@ class GameScene extends Phaser.Scene {
       font: "32px GardenFlower",
       fill: "#ffffff",
     });
+
+    this.scoreText = this.add
+      .text(1260, 30, "", {
+        font: "32px GardenFlower",
+        fill: "#ffffff",
+      })
+      .setOrigin(1, 0);
   }
 
   updateTexts() {
     this.timeoutText.setText("Time: " + this.timeout);
     this.levelText.setText("Level: " + config.currentLevel);
+    this.scoreText.setText("Score: " + this.totalScore);
   }
 
   start() {
@@ -112,6 +125,8 @@ class GameScene extends Phaser.Scene {
     this.timeout = level.time;
     this.openedCard = null;
     this.openedCardsCount = 0;
+    this.consecutiveMatches = 0;
+    this.levelScore = 0;
     this.timer.paused = false;
     this.updateTexts();
     this.createCards();
@@ -120,6 +135,8 @@ class GameScene extends Phaser.Scene {
   }
 
   restart() {
+    this.consecutiveMatches = 0;
+
     let count = 0;
     let onCardMoveComplete = () => {
       count += 1;
@@ -212,12 +229,19 @@ class GameScene extends Phaser.Scene {
 
     if (this.openedCard) {
       if (this.openedCard.value === card.value) {
+        this.consecutiveMatches += 1;
+        let earnedPoints = calculateScore(this.consecutiveMatches);
+        this.levelScore += earnedPoints;
+        this.totalScore += earnedPoints;
+        this.updateTexts();
+
         if (this.openedCardsCount + 1 !== this.cards.length / 2) {
           this.sounds.success.play();
         }
         this.openedCard = null;
         this.openedCardsCount += 1;
       } else {
+        this.consecutiveMatches = 0;
         this.openedCard.close();
         this.openedCard = card;
       }
