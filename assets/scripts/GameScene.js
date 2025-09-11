@@ -25,8 +25,13 @@ class GameScene extends Phaser.Scene {
 
   nextLevel() {
     this.timer.paused = true;
+    this.cleanupPointsAnimations();
+
+    this.totalScore += this.levelScore;
+    this.scoreText.setText("Score: " + this.totalScore);
 
     if (config.currentLevel < config.levels.length) {
+      config.currentLevel += 1;
       this.scene.pause();
       this.scene.launch("LevelComplete", {
         message: "Level Complete!",
@@ -34,7 +39,6 @@ class GameScene extends Phaser.Scene {
         levelScore: this.levelScore,
         totalScore: this.totalScore,
       });
-      config.currentLevel += 1;
     } else {
       this.scene.pause();
       this.scene.launch("LevelComplete", {
@@ -66,6 +70,55 @@ class GameScene extends Phaser.Scene {
       callback: this.onTimerTick,
       loop: true,
       callbackScope: this,
+    });
+  }
+
+  showPointsAnimation(points) {
+    const pointsText = this.add
+      .text(
+        this.sys.game.config.width / 2,
+        this.sys.game.config.height / 2,
+        "+" + points,
+        {
+          font: "48px GardenFlower",
+          fill: "#FFD700",
+          stroke: "#8B4513",
+          strokeThickness: 3,
+        }
+      )
+      .setOrigin(0.5, 0.5);
+
+    pointsText.setDepth(1000);
+
+    this.tweens.add({
+      targets: pointsText,
+      y: pointsText.y - 500,
+      x: pointsText.x + Phaser.Math.Between(-30, 30),
+      scaleX: { from: 0.5, to: 1.8 },
+      scaleY: { from: 0.5, to: 1.8 },
+      alpha: {
+        value: 0,
+        delay: 600,
+        duration: 900,
+      },
+      ease: "Power2.easeOut",
+      //   ease: "Back.easeOut",
+      duration: 1500,
+      onComplete: () => {
+        pointsText.destroy();
+      },
+    });
+  }
+
+  cleanupPointsAnimations() {
+    const pointsTexts = this.children.list.filter(
+      (child) => child.type === "Text" && child.depth === 1000
+    );
+
+    this.tweens.killTweensOf(pointsTexts);
+
+    pointsTexts.forEach((text) => {
+      text.destroy();
     });
   }
 
@@ -140,6 +193,7 @@ class GameScene extends Phaser.Scene {
     let count = 0;
     let onCardMoveComplete = () => {
       count += 1;
+
       if (count >= this.cards.length) {
         this.start();
       }
@@ -232,8 +286,9 @@ class GameScene extends Phaser.Scene {
         this.consecutiveMatches += 1;
         let earnedPoints = calculateScore(this.consecutiveMatches);
         this.levelScore += earnedPoints;
-        this.totalScore += earnedPoints;
-        this.updateTexts();
+        this.showPointsAnimation(earnedPoints);
+        // this.totalScore += earnedPoints;
+        // this.updateTexts();
 
         if (this.openedCardsCount + 1 !== this.cards.length / 2) {
           this.sounds.success.play();

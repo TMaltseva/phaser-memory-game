@@ -110,6 +110,7 @@ class LevelCompleteScene extends Phaser.Scene {
     this.scene.resume("Game");
 
     if (this.isGameComplete) {
+      config.currentLevel = 1;
       this.scene.get("Game").totalScore = 0;
     }
 
