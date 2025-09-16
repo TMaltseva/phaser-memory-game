@@ -40,6 +40,8 @@ class GameScene extends Phaser.Scene {
         totalScore: this.totalScore,
       });
     } else {
+      this.saveGameRecord();
+
       this.scene.pause();
       this.scene.launch("LevelComplete", {
         message: "You Win!",
@@ -52,7 +54,6 @@ class GameScene extends Phaser.Scene {
   }
 
   onTimerTick() {
-    // console.log((this.timeout -= 1));
     this.timeoutText.setText("Time: " + this.timeout);
 
     if (this.timeout <= 0) {
@@ -74,6 +75,7 @@ class GameScene extends Phaser.Scene {
   }
 
   showPointsAnimation(points) {
+    const dpi = window.devicePixelRatio || 1;
     const pointsText = this.add
       .text(
         this.sys.game.config.width / 2,
@@ -86,7 +88,8 @@ class GameScene extends Phaser.Scene {
           strokeThickness: 3,
         }
       )
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setResolution(dpi);
 
     pointsText.setDepth(1000);
 
@@ -102,7 +105,6 @@ class GameScene extends Phaser.Scene {
         duration: 900,
       },
       ease: "Power2.easeOut",
-      //   ease: "Back.easeOut",
       duration: 1500,
       onComplete: () => {
         pointsText.destroy();
@@ -139,6 +141,7 @@ class GameScene extends Phaser.Scene {
 
   create() {
     this.totalScore = 0;
+    this.gameStartTime = Date.now();
     this.createSounds();
     this.createTimer();
     this.createBackground();
@@ -148,22 +151,32 @@ class GameScene extends Phaser.Scene {
   }
 
   createText() {
-    this.timeoutText = this.add.text(20, 30, "", {
-      font: "32px GardenFlower",
-      fill: "#ffffff",
-    });
+    const dpi = window.devicePixelRatio || 1;
 
-    this.levelText = this.add.text(20, 70, "", {
-      font: "32px GardenFlower",
-      fill: "#ffffff",
-    });
-
-    this.scoreText = this.add
-      .text(1260, 30, "", {
+    this.timeoutText = this.add
+      .text(20, 30, "", {
         font: "32px GardenFlower",
         fill: "#ffffff",
       })
-      .setOrigin(1, 0);
+      .setResolution(dpi);
+
+    this.levelText = this.add
+      .text(20, 70, "", {
+        font: "32px GardenFlower",
+        fill: "#ffffff",
+      })
+      .setResolution(dpi);
+
+    this.scoreText = this.add
+      .text(this.sys.game.config.width / 2 + 50, 30, "", {
+        font: "32px GardenFlower",
+        fill: "#ffffff",
+      })
+      .setOrigin(1, 0)
+      .setResolution(dpi);
+
+    this.createRecordsButton();
+    this.createAboutButton();
   }
 
   updateTexts() {
@@ -185,27 +198,47 @@ class GameScene extends Phaser.Scene {
     this.createCards();
     this.initCards();
     this.showCards();
+
+    if (config.currentLevel === 1) {
+      this.gameStartTime = Date.now();
+    }
   }
 
   restart() {
     this.consecutiveMatches = 0;
 
+    if (this.cards) {
+      this.cards.forEach((card) => {
+        this.tweens.killTweensOf(card);
+      });
+    }
+
     let count = 0;
+    let totalCards = this.cards ? this.cards.length : 0;
+
+    if (totalCards === 0) {
+      this.start();
+      return;
+    }
+
     let onCardMoveComplete = () => {
       count += 1;
-
-      if (count >= this.cards.length) {
+      if (count >= totalCards) {
         this.start();
       }
     };
 
     this.cards.forEach((card) => {
-      card.move({
-        x: this.sys.game.config.width + card.width,
-        y: this.sys.game.config.height + card.height,
-        delay: card.position.delay,
-        callback: onCardMoveComplete,
-      });
+      if (card && card.scene) {
+        card.move({
+          x: this.sys.game.config.width + card.width,
+          y: this.sys.game.config.height + card.height,
+          delay: card.position.delay,
+          callback: onCardMoveComplete,
+        });
+      } else {
+        onCardMoveComplete();
+      }
     });
   }
 
@@ -234,7 +267,12 @@ class GameScene extends Phaser.Scene {
 
   createCards() {
     if (this.cards) {
-      this.cards.forEach((card) => card.destroy());
+      this.cards.forEach((card) => {
+        if (card && card.scene) {
+          this.tweens.killTweensOf(card);
+          card.destroy();
+        }
+      });
     }
 
     this.cards = [];
@@ -253,13 +291,14 @@ class GameScene extends Phaser.Scene {
     const grid = calculateGrid(level.pairs);
 
     let cardTexture = this.textures.get("card").getSourceImage();
-    let cardWidth = cardTexture.width + 4;
-    let cardHeight = cardTexture.height + 4;
+    let cardWidth = cardTexture.width + 5;
+    let cardHeight = cardTexture.height + 5;
     let offsetX =
       (this.sys.game.config.width - cardWidth * grid.cols) / 2 + cardWidth / 2;
     let offsetY =
       (this.sys.game.config.height - cardHeight * grid.rows) / 2 +
-      cardHeight / 2;
+      cardHeight / 2 +
+      30;
     let id = 0;
 
     for (let row = 0; row < grid.rows; row++) {
@@ -277,7 +316,7 @@ class GameScene extends Phaser.Scene {
   }
 
   onCardClicked(_pointer, card) {
-    if (card.opened) return false;
+    if (!card || !(card instanceof Card) || card.opened) return false;
 
     this.sounds.card.play();
 
@@ -287,8 +326,6 @@ class GameScene extends Phaser.Scene {
         let earnedPoints = calculateScore(this.consecutiveMatches);
         this.levelScore += earnedPoints;
         this.showPointsAnimation(earnedPoints);
-        // this.totalScore += earnedPoints;
-        // this.updateTexts();
 
         if (this.openedCardsCount + 1 !== this.cards.length / 2) {
           this.sounds.success.play();
@@ -310,5 +347,84 @@ class GameScene extends Phaser.Scene {
         this.nextLevel();
       }
     });
+  }
+
+  createRecordsButton() {
+    const dpi = window.devicePixelRatio || 1;
+    const recordsText = this.add
+      .text(1100, 30, "Records", {
+        font: "32px GardenFlower",
+        fill: "#ffffff",
+      })
+      .setOrigin(1, 0)
+      .setResolution(dpi)
+      .setInteractive()
+      .on("pointerover", () => {
+        recordsText.setStyle({ fill: "#FFD700" });
+        this.input.setDefaultCursor("pointer");
+      })
+      .on("pointerout", () => {
+        recordsText.setStyle({ fill: "#ffffff" });
+        this.input.setDefaultCursor("default");
+      })
+      .on("pointerdown", () => {
+        event.stopPropagation();
+        this.showRecords();
+      });
+  }
+
+  createAboutButton() {
+    const dpi = window.devicePixelRatio || 1;
+    const aboutText = this.add
+      .text(1250, 30, "About", {
+        font: "32px GardenFlower",
+        fill: "#ffffff",
+      })
+      .setOrigin(1, 0)
+      .setResolution(dpi)
+      .setInteractive()
+      .on("pointerover", () => {
+        aboutText.setStyle({ fill: "#FFD700" });
+        this.input.setDefaultCursor("pointer");
+      })
+      .on("pointerout", () => {
+        aboutText.setStyle({ fill: "#ffffff" });
+        this.input.setDefaultCursor("default");
+      })
+      .on("pointerdown", () => {
+        event.stopPropagation();
+        this.showAbout();
+      });
+  }
+
+  showRecords() {
+    this.scene.pause();
+    this.scene.launch("Records");
+  }
+
+  showAbout() {
+    this.scene.pause();
+    this.scene.launch("About");
+  }
+
+  saveGameRecord() {
+    const gameEndTime = Date.now();
+    const totalGameTime = Math.floor((gameEndTime - this.gameStartTime) / 1000);
+    const record = {
+      date: new Date().toISOString(),
+      totalTime: totalGameTime,
+      totalScore: this.totalScore,
+    };
+
+    let records = [];
+    const existingRecords = localStorage.getItem("memoryGameRecords");
+    if (existingRecords) {
+      records = JSON.parse(existingRecords);
+    }
+
+    records.push(record);
+    records.sort((a, b) => new Date(b.date) - new Date(a.date));
+    records = records.slice(0, 20);
+    localStorage.setItem("memoryGameRecords", JSON.stringify(records));
   }
 }

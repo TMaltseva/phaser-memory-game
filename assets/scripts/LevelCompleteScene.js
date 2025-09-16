@@ -11,9 +11,10 @@ class LevelCompleteScene extends Phaser.Scene {
   }
 
   create() {
+    const dpi = window.devicePixelRatio || 1;
     this.createModal();
-    this.createTexts();
-    this.createButton();
+    this.createTexts(dpi);
+    this.createButton(dpi);
   }
 
   createModal() {
@@ -22,14 +23,15 @@ class LevelCompleteScene extends Phaser.Scene {
     modal.setDisplaySize(700, 400);
   }
 
-  createTexts() {
+  createTexts(dpi) {
     this.add
       .text(640, 300, this.message, {
         font: "38px GardenFlower",
         fill: "#8B4513",
         align: "center",
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setResolution(dpi);
 
     if (!this.isGameComplete) {
       this.add
@@ -38,7 +40,8 @@ class LevelCompleteScene extends Phaser.Scene {
           fill: "#8B4513",
           align: "center",
         })
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setResolution(dpi);
     }
 
     this.add
@@ -47,10 +50,11 @@ class LevelCompleteScene extends Phaser.Scene {
         fill: "#8B4513",
         align: "center",
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setResolution(dpi);
   }
 
-  createButton() {
+  createButton(dpi) {
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0x8b4513);
 
@@ -61,7 +65,8 @@ class LevelCompleteScene extends Phaser.Scene {
         fill: "#ffffff",
         align: "center",
       })
-      .setOrigin(0.5);
+      .setOrigin(0.5)
+      .setResolution(dpi);
 
     let buttonContainer = this.add.container(640, 440, [buttonBg, button]);
     buttonContainer.setSize(200, 60);
