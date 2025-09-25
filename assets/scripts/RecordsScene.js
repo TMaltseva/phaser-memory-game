@@ -14,6 +14,29 @@ class RecordsScene extends Phaser.Scene {
   }
 
   create() {
+    this.scale.on("resize", this.handleResize, this);
+    const dpi = window.devicePixelRatio || 1;
+    this.createModal();
+    this.createTitle(dpi);
+    this.createTable(dpi);
+    this.createClearButton(dpi);
+    this.createCloseButton(dpi);
+  }
+
+  getRealSize() {
+    return {
+      width: this.scale.width,
+      height: this.scale.height,
+    };
+  }
+
+  handleResize() {
+    if (!this.scene.isActive()) return;
+
+    this.children.removeAll();
+    this.tableContainer = null;
+    this.headersContainer = null;
+
     const dpi = window.devicePixelRatio || 1;
     this.createModal();
     this.createTitle(dpi);
@@ -34,15 +57,83 @@ class RecordsScene extends Phaser.Scene {
   }
 
   createModal() {
-    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.7);
-    let modal = this.add.image(640, 360, "modalBg");
-    modal.setDisplaySize(1600, 800);
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+    const isLargeScreen = width >= 768 && width < 1024;
+    const isXLargeScreen = width >= 1024;
+
+    this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.7);
+
+    let modalWidth, modalHeight;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        modalWidth = width * 1.5;
+        modalHeight = Math.min(height * 0.92, 700);
+      } else if (isMediumScreen) {
+        modalWidth = width * 1.5;
+        modalHeight = Math.min(height * 0.94, 800);
+      } else {
+        modalWidth = Math.min(width * 0.5, 1200);
+        modalHeight = Math.min(height * 0.9, 900);
+      }
+    } else {
+      if (isSmallScreen) {
+        modalWidth = width * 0.98;
+        modalHeight = Math.min(height * 0.95, 600);
+      } else if (isMediumScreen) {
+        modalWidth = width * 1.5;
+        modalHeight = Math.min(height * 0.95, 700);
+      } else if (isLargeScreen) {
+        modalWidth = Math.min(width * 1.5, 1400);
+        modalHeight = Math.min(height * 1.2, 800);
+      } else {
+        modalWidth = Math.min(width * 1.5, 1850);
+        modalHeight = Math.min(height * 1.2, 900);
+      }
+    }
+
+    let modal = this.add.image(width / 2, height / 2, "modalBg");
+    modal.setDisplaySize(modalWidth, modalHeight);
   }
 
   createTitle(dpi) {
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+
+    let fontSize, titleY;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        fontSize = "24px";
+        titleY = height * 0.24;
+      } else if (isMediumScreen) {
+        fontSize = "28px";
+        titleY = height * 0.23;
+      } else {
+        fontSize = "32px";
+        titleY = height * 0.235;
+      }
+    } else {
+      if (isSmallScreen) {
+        fontSize = "28px";
+        titleY = height * 0.2;
+      } else if (isMediumScreen) {
+        fontSize = "30px";
+        titleY = height * 0.23;
+      } else {
+        fontSize = "36px";
+        titleY = height * 0.18;
+      }
+    }
+
     this.add
-      .text(640, 140, "Best 5 records", {
-        font: "42px GardenFlower",
+      .text(width / 2, titleY, "Best 5 records", {
+        font: `${fontSize} GardenFlower`,
         fill: "#8B4513",
         align: "center",
       })
@@ -51,17 +142,101 @@ class RecordsScene extends Phaser.Scene {
   }
 
   createTable(dpi) {
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
+
     this.tableContainer = this.add.container(0, 0);
-    this.createTableHeaders(220, dpi);
-    this.createTableData(290, dpi);
+
+    let headerY, dataStartY;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        headerY = height * 0.32;
+        dataStartY = headerY + 35;
+      } else {
+        headerY = height * 0.33;
+        dataStartY = headerY + 40;
+      }
+    } else {
+      if (isSmallScreen) {
+        headerY = height * 0.3;
+        dataStartY = headerY + 40;
+      } else {
+        headerY = height * 0.32;
+        dataStartY = headerY + 50;
+      }
+    }
+
+    this.createTableHeaders(headerY, dpi);
+    this.createTableData(dataStartY, dpi);
   }
 
   createTableHeaders(headerY, dpi) {
+    const { width } = this.getRealSize();
+    const isPortrait = width < 600;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+
     this.headersContainer = this.add.container(0, 0);
+
+    let col1X, col2X, col3X;
+    let fontSize, arrowFontSize;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        fontSize = "16px";
+        arrowFontSize = "12px";
+      } else if (isMediumScreen) {
+        fontSize = "18px";
+        arrowFontSize = "14px";
+      } else {
+        fontSize = "20px";
+        arrowFontSize = "16px";
+      }
+    } else {
+      if (isSmallScreen) {
+        fontSize = "18px";
+        arrowFontSize = "14px";
+      } else if (isMediumScreen) {
+        fontSize = "22px";
+        arrowFontSize = "16px";
+      } else {
+        fontSize = "24px";
+        arrowFontSize = "20px";
+      }
+    }
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        col1X = width * 0.2;
+        col2X = width * 0.5;
+        col3X = width * 0.8;
+      } else {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      }
+    } else {
+      if (isSmallScreen) {
+        col1X = width * 0.3;
+        col2X = width * 0.5;
+        col3X = width * 0.7;
+      } else if (isMediumScreen) {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      } else {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      }
+    }
+
     this.headersContainer.add(
       this.add
-        .text(400, headerY, "Date & Time", {
-          font: "28px GardenFlower",
+        .text(col1X, headerY, isPortrait ? "Date" : "Date & Time", {
+          font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
         })
@@ -70,8 +245,8 @@ class RecordsScene extends Phaser.Scene {
     );
 
     const timeHeader = this.add
-      .text(640, headerY, "Total Time", {
-        font: "28px GardenFlower",
+      .text(col2X, headerY, isPortrait ? "Time" : "Total Time", {
+        font: `${fontSize} GardenFlower`,
         fill: this.sortBy === "time" ? "#FFD700" : "#8B4513",
         align: "center",
       })
@@ -99,10 +274,22 @@ class RecordsScene extends Phaser.Scene {
 
     if (this.sortBy === "time") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
+      let arrowX;
+
+      if (isPortrait) {
+        arrowX = isSmallScreen ? col2X + 20 : col2X + 30;
+      } else {
+        arrowX = isSmallScreen
+          ? col2X + 40
+          : isMediumScreen
+          ? col2X + 50
+          : col2X + 60;
+      }
+
       this.headersContainer.add(
         this.add
-          .text(700, headerY, arrow, {
-            font: "20px GardenFlower",
+          .text(arrowX, headerY, arrow, {
+            font: `${arrowFontSize} GardenFlower`,
             fill: "#FFD700",
             align: "center",
           })
@@ -112,8 +299,8 @@ class RecordsScene extends Phaser.Scene {
     }
 
     const scoreHeader = this.add
-      .text(880, headerY, "Total Score", {
-        font: "28px GardenFlower",
+      .text(col3X, headerY, isPortrait ? "Score" : "Total Score", {
+        font: `${fontSize} GardenFlower`,
         fill: this.sortBy === "score" ? "#FFD700" : "#8B4513",
         align: "center",
       })
@@ -141,10 +328,22 @@ class RecordsScene extends Phaser.Scene {
 
     if (this.sortBy === "score") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
+      let arrowX;
+
+      if (isPortrait) {
+        arrowX = isSmallScreen ? col3X + 20 : col3X + 30;
+      } else {
+        arrowX = isSmallScreen
+          ? col3X + 50
+          : isMediumScreen
+          ? col3X + 65
+          : col3X + 80;
+      }
+
       this.headersContainer.add(
         this.add
-          .text(1040, headerY, arrow, {
-            font: "20px GardenFlower",
+          .text(arrowX, headerY, arrow, {
+            font: `${arrowFontSize} GardenFlower`,
             fill: "#FFD700",
             align: "center",
           })
@@ -152,44 +351,120 @@ class RecordsScene extends Phaser.Scene {
           .setResolution(dpi)
       );
     }
-
-    const line = this.add.graphics();
-    line.lineStyle(2, 0x8b4513);
-    line.moveTo(200, headerY + 20);
-    line.lineTo(1080, headerY + 20);
-    // line.stroke();
-    this.headersContainer.add(line);
   }
 
   createTableData(startY, dpi) {
+    const { width, height } = this.getRealSize();
+    const isPortrait = width < 600;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+
     if (this.sortedRecords.length === 0) {
+      let noRecordsText, fontSize;
+
+      if (isPortrait) {
+        if (isSmallScreen) {
+          noRecordsText =
+            "No records yet.\nComplete the game\nto set a record!";
+          fontSize = "16px";
+        } else {
+          noRecordsText =
+            "No records yet.\nComplete the game\nto set a record!";
+          fontSize = "20px";
+        }
+      } else {
+        if (isSmallScreen) {
+          noRecordsText = "No records yet.\nComplete the game to set a record!";
+          fontSize = "18px";
+        } else if (isMediumScreen) {
+          noRecordsText = "No records yet.\nComplete the game to set a record!";
+          fontSize = "22px";
+        } else {
+          noRecordsText = "No records yet.\nComplete the game to set a record!";
+          fontSize = "24px";
+        }
+      }
+
       this.tableContainer.add(
         this.add
-          .text(
-            640,
-            startY + 100,
-            "No records yet. Complete the game to set a record!",
-            {
-              font: "28px GardenFlower",
-              fill: "#8B4513",
-              align: "center",
-            }
-          )
+          .text(width / 2, startY + 80, noRecordsText, {
+            font: `${fontSize} GardenFlower`,
+            fill: "#8B4513",
+            align: "center",
+            lineSpacing: 8,
+          })
           .setOrigin(0.5)
           .setResolution(dpi)
       );
       return;
     }
 
-    const rowHeight = 35;
+    let col1X, col2X, col3X;
+    let fontSize;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        fontSize = "14px";
+      } else if (isMediumScreen) {
+        fontSize = "16px";
+      } else {
+        fontSize = "18px";
+      }
+    } else {
+      if (isSmallScreen) {
+        fontSize = "16px";
+      } else if (isMediumScreen) {
+        fontSize = "20px";
+      } else {
+        fontSize = "24px";
+      }
+    }
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        col1X = width * 0.2;
+        col2X = width * 0.5;
+        col3X = width * 0.8;
+      } else {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      }
+    } else {
+      if (isSmallScreen) {
+        col1X = width * 0.3;
+        col2X = width * 0.5;
+        col3X = width * 0.7;
+      } else if (isMediumScreen) {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      } else {
+        col1X = width * 0.25;
+        col2X = width * 0.5;
+        col3X = width * 0.75;
+      }
+    }
+
+    let rowHeight;
+    if (isPortrait) {
+      rowHeight = isSmallScreen ? 25 : isMediumScreen ? 28 : 30;
+    } else {
+      rowHeight = isSmallScreen ? 28 : isMediumScreen ? 32 : 35;
+    }
+
     const visibleRecords = this.sortedRecords.slice(0, 5);
 
     visibleRecords.forEach((record, index) => {
       const y = startY + index * rowHeight;
 
+      const formattedDate = isPortrait
+        ? this.formatDateShort(record.date)
+        : this.formatDate(record.date);
+
       const dateText = this.add
-        .text(400, y, this.formatDate(record.date), {
-          font: "28px GardenFlower",
+        .text(col1X, y, formattedDate, {
+          font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
         })
@@ -198,8 +473,8 @@ class RecordsScene extends Phaser.Scene {
         .setAlpha(0);
 
       const timeText = this.add
-        .text(640, y, this.formatTime(record.totalTime), {
-          font: "28px GardenFlower",
+        .text(col2X, y, this.formatTime(record.totalTime), {
+          font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
         })
@@ -208,8 +483,8 @@ class RecordsScene extends Phaser.Scene {
         .setAlpha(0);
 
       const scoreText = this.add
-        .text(880, y, record.totalScore.toString(), {
-          font: "28px GardenFlower",
+        .text(col3X, y, record.totalScore.toString(), {
+          font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
         })
@@ -230,6 +505,170 @@ class RecordsScene extends Phaser.Scene {
         ease: "Power2",
       });
     });
+  }
+
+  createClearButton(dpi) {
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+
+    let clearButtonX, buttonY, buttonWidth, buttonHeight, fontSize;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        clearButtonX = width * 0.3;
+        buttonY = height * 0.7;
+        buttonWidth = 80;
+        buttonHeight = 35;
+        fontSize = "18px";
+      } else if (isMediumScreen) {
+        clearButtonX = width * 0.32;
+        buttonY = height * 0.7;
+        buttonWidth = 90;
+        buttonHeight = 40;
+        fontSize = "20px";
+      } else {
+        clearButtonX = width * 0.35;
+        buttonY = height * 0.88;
+        buttonWidth = 100;
+        buttonHeight = 45;
+        fontSize = "22px";
+      }
+    } else {
+      if (isSmallScreen) {
+        clearButtonX = width * 0.35;
+        buttonY = height * 0.7;
+        buttonWidth = 80;
+        buttonHeight = 35;
+        fontSize = "18px";
+      } else if (isMediumScreen) {
+        clearButtonX = width * 0.37;
+        buttonY = height * 0.72;
+        buttonWidth = 90;
+        buttonHeight = 40;
+        fontSize = "20px";
+      } else {
+        clearButtonX = width * 0.4;
+        buttonY = height * 0.75;
+        buttonWidth = 100;
+        buttonHeight = 45;
+        fontSize = "22px";
+      }
+    }
+
+    let buttonBg = this.add.graphics();
+    this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight);
+
+    let button = this.add
+      .text(0, 3, "Clear", {
+        font: `${fontSize} GardenFlower`,
+        fill: "#ffffff",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setResolution(dpi);
+
+    let buttonContainer = this.add.container(clearButtonX, buttonY, [
+      buttonBg,
+      button,
+    ]);
+    buttonContainer.setSize(buttonWidth, buttonHeight);
+    buttonContainer.setInteractive();
+
+    this.setupClearButtonEvents(buttonContainer, buttonBg);
+  }
+
+  createCloseButton(dpi) {
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
+    const isMediumScreen = width >= 480 && width < 768;
+
+    let closeButtonX, buttonY, buttonWidth, buttonHeight, fontSize;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        closeButtonX = width * 0.7;
+        buttonY = height * 0.7;
+        buttonWidth = 80;
+        buttonHeight = 35;
+        fontSize = "18px";
+      } else if (isMediumScreen) {
+        closeButtonX = width * 0.68;
+        buttonY = height * 0.7;
+        buttonWidth = 90;
+        buttonHeight = 40;
+        fontSize = "20px";
+      } else {
+        closeButtonX = width * 0.65;
+        buttonY = height * 0.88;
+        buttonWidth = 100;
+        buttonHeight = 45;
+        fontSize = "22px";
+      }
+    } else {
+      if (isSmallScreen) {
+        closeButtonX = width * 0.65;
+        buttonY = height * 0.7;
+        buttonWidth = 80;
+        buttonHeight = 35;
+        fontSize = "18px";
+      } else if (isMediumScreen) {
+        closeButtonX = width * 0.63;
+        buttonY = height * 0.72;
+        buttonWidth = 90;
+        buttonHeight = 40;
+        fontSize = "20px";
+      } else {
+        closeButtonX = width * 0.6;
+        buttonY = height * 0.75;
+        buttonWidth = 100;
+        buttonHeight = 45;
+        fontSize = "22px";
+      }
+    }
+
+    let buttonBg = this.add.graphics();
+    this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
+
+    let button = this.add
+      .text(0, 3, "Close", {
+        font: `${fontSize} GardenFlower`,
+        fill: "#ffffff",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setResolution(dpi);
+
+    let buttonContainer = this.add.container(closeButtonX, buttonY, [
+      buttonBg,
+      button,
+    ]);
+    buttonContainer.setSize(buttonWidth, buttonHeight);
+    buttonContainer.setInteractive();
+
+    this.setupCloseButtonEvents(buttonContainer, buttonBg);
+  }
+
+  formatDateShort(dateString) {
+    try {
+      const date = new Date(dateString);
+      const day = date.getDate().toString().padStart(2, "0");
+      const month = (date.getMonth() + 1).toString().padStart(2, "0");
+      const hours = date.getHours().toString().padStart(2, "0");
+      const minutes = date.getMinutes().toString().padStart(2, "0");
+
+      return `${day}.${month}\n${hours}:${minutes}`;
+    } catch (error) {
+      return "Invalid";
+    }
+  }
+
+  drawButton(graphics, color, width = 120, height = 40) {
+    graphics.clear();
+    graphics.fillStyle(color);
+    graphics.fillRoundedRect(-width / 2, -height / 2, width, height, 20);
   }
 
   handleSort(column) {
@@ -258,6 +697,7 @@ class RecordsScene extends Phaser.Scene {
 
   updateTable() {
     const dpi = window.devicePixelRatio || 1;
+    const { height } = this.getRealSize();
 
     if (this.tableContainer) {
       this.tableContainer.destroy();
@@ -266,7 +706,13 @@ class RecordsScene extends Phaser.Scene {
       this.headersContainer.destroy();
     }
 
-    this.createTable(dpi);
+    this.tableContainer = this.add.container(0, 0);
+
+    const headerY = height * 0.25;
+    const dataStartY = height * 0.35;
+
+    this.createTableHeaders(headerY, dpi);
+    this.createTableData(dataStartY, dpi);
   }
 
   sortRecords(records) {
@@ -310,65 +756,19 @@ class RecordsScene extends Phaser.Scene {
     return `${minutes}m ${remainingSeconds.toString().padStart(2, "0")}s`;
   }
 
-  createClearButton(dpi) {
-    let buttonBg = this.add.graphics();
-    this.drawButton(buttonBg, 0xdc143c, 120, 50);
-
-    let button = this.add
-      .text(0, 3, "Clear", {
-        font: "24px GardenFlower",
-        fill: "#ffffff",
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi);
-
-    let buttonContainer = this.add.container(500, 550, [buttonBg, button]);
-    buttonContainer.setSize(120, 45);
-    buttonContainer.setInteractive();
-
-    this.setupClearButtonEvents(buttonContainer, buttonBg);
-  }
-
-  createCloseButton(dpi) {
-    let buttonBg = this.add.graphics();
-    this.drawButton(buttonBg, 0x8b4513, 120, 50);
-
-    let button = this.add
-      .text(0, 3, "Close", {
-        font: "24px GardenFlower",
-        fill: "#ffffff",
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi);
-
-    let buttonContainer = this.add.container(780, 550, [buttonBg, button]);
-    buttonContainer.setSize(120, 45);
-    buttonContainer.setInteractive();
-
-    this.setupCloseButtonEvents(buttonContainer, buttonBg);
-  }
-
-  drawButton(graphics, color, width = 120, height = 40) {
-    graphics.clear();
-    graphics.fillStyle(color);
-    graphics.fillRoundedRect(-width / 2, -height / 2, width, height, 20);
-  }
-
   setupClearButtonEvents(container, buttonBg) {
     const dpi = window.devicePixelRatio || 1;
 
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xff1744, 120, 45);
+      this.drawButton(buttonBg, 0xff1744, 100, 45);
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0xdc143c, 120, 45);
+      this.drawButton(buttonBg, 0xdc143c, 100, 45);
     });
 
     container.on("pointerdown", () => {
@@ -380,13 +780,13 @@ class RecordsScene extends Phaser.Scene {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xa0522d, 120, 45);
+      this.drawButton(buttonBg, 0xa0522d, 100, 45);
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0x8b4513, 120, 45);
+      this.drawButton(buttonBg, 0x8b4513, 100, 45);
     });
 
     container.on("pointerdown", () => {
@@ -395,26 +795,46 @@ class RecordsScene extends Phaser.Scene {
   }
 
   showClearConfirmation(dpi) {
-    const overlay = this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.8);
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+
+    const overlay = this.add.rectangle(
+      width / 2,
+      height / 2,
+      width,
+      height,
+      0x000000,
+      0.8
+    );
 
     const confirmModal = this.add.graphics();
+
+    const modalWidth = isPortrait ? width * 0.8 : 400;
+    const modalHeight = isPortrait ? height * 0.3 : 200;
+    const modalX = width / 2 - modalWidth / 2;
+    const modalY = height / 2 - modalHeight / 2;
+
     confirmModal.fillStyle(0x8b4513, 0.9);
     confirmModal.lineStyle(3, 0xffffff);
-    confirmModal.fillRoundedRect(440, 260, 400, 200, 20);
-    confirmModal.strokeRoundedRect(440, 260, 400, 200, 20);
+    confirmModal.fillRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
+    confirmModal.strokeRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
 
     const confirmText = this.add
-      .text(640, 320, "Clear all records?", {
-        font: "24px GardenFlower",
+      .text(width / 2, height / 2 - 30, "Clear all records?", {
+        font: isPortrait ? "20px GardenFlower" : "24px GardenFlower",
         fill: "#ffffff",
         align: "center",
       })
       .setOrigin(0.5)
       .setResolution(dpi);
 
+    const buttonY = height / 2 + 30;
+    const yesButtonX = isPortrait ? width / 2 - 50 : width / 2 - 60;
+    const noButtonX = isPortrait ? width / 2 + 50 : width / 2 + 60;
+
     const yesButton = this.add
-      .text(580, 390, "Yes", {
-        font: "32px GardenFlower",
+      .text(yesButtonX, buttonY, "Yes", {
+        font: "28px GardenFlower",
         fill: "#FFD700",
         align: "center",
       })
@@ -423,8 +843,8 @@ class RecordsScene extends Phaser.Scene {
       .setInteractive();
 
     const noButton = this.add
-      .text(700, 390, "No", {
-        font: "32px GardenFlower",
+      .text(noButtonX, buttonY, "No", {
+        font: "28px GardenFlower",
         fill: "#FFD700",
         align: "center",
       })
@@ -471,5 +891,10 @@ class RecordsScene extends Phaser.Scene {
     this.input.setDefaultCursor("default");
     this.scene.stop();
     this.scene.resume("Game");
+  }
+
+  destroy() {
+    this.scale.off("resize", this.handleResize, this);
+    super.destroy();
   }
 }

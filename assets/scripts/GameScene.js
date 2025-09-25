@@ -1,10 +1,16 @@
 class GameScene extends Phaser.Scene {
   constructor() {
     super("Game");
+    this.isPortrait = false;
+    this.resizeTimeout = null;
   }
 
   preload() {
     this.load.image("background", "assets/sprites/background.png");
+    this.load.image(
+      "background-portrait",
+      "assets/sprites/background-portrait.png"
+    );
     this.load.image("card", "assets/sprites/card.png");
     this.load.image("card1", "assets/sprites/card1.png");
     this.load.image("card2", "assets/sprites/card2.png");
@@ -17,6 +23,13 @@ class GameScene extends Phaser.Scene {
     this.load.audio("complete", "assets/sounds/complete.mp3");
     this.load.audio("timeout", "assets/sounds/timeout.mp3");
     this.load.image("modalBg", "assets/sprites/modal-bg.png");
+  }
+
+  getRealSize() {
+    return {
+      width: this.scale.width,
+      height: this.scale.height,
+    };
   }
 
   getCurrentLevel() {
@@ -76,18 +89,15 @@ class GameScene extends Phaser.Scene {
 
   showPointsAnimation(points) {
     const dpi = window.devicePixelRatio || 1;
+    const { width, height } = this.getRealSize();
+
     const pointsText = this.add
-      .text(
-        this.sys.game.config.width / 2,
-        this.sys.game.config.height / 2,
-        "+" + points,
-        {
-          font: "48px GardenFlower",
-          fill: "#FFD700",
-          stroke: "#8B4513",
-          strokeThickness: 3,
-        }
-      )
+      .text(width / 2, height / 2, "+" + points, {
+        font: "48px GardenFlower",
+        fill: "#FFD700",
+        stroke: "#8B4513",
+        strokeThickness: 3,
+      })
       .setOrigin(0.5, 0.5)
       .setResolution(dpi);
 
@@ -144,35 +154,139 @@ class GameScene extends Phaser.Scene {
     this.gameStartTime = Date.now();
     this.createSounds();
     this.createTimer();
+
+    this.scale.on("resize", this.handleResize, this);
+    window.addEventListener("resize", this.handleWindowResize);
     this.createBackground();
     this.createText();
     this.input.on("gameobjectdown", this.onCardClicked, this);
+    this.checkOrientation();
     this.start();
+  }
+
+  handleWindowResize = () => {
+    if (!this.scene.isActive()) return;
+
+    if (this.windowResizeTimeout) {
+      clearTimeout(this.windowResizeTimeout);
+    }
+
+    this.windowResizeTimeout = setTimeout(() => {
+      this.forceLayoutUpdate();
+      this.windowResizeTimeout = null;
+    }, 100);
+  };
+
+  destroy() {
+    window.removeEventListener("resize", this.handleWindowResize);
+    super.destroy();
+  }
+
+  checkOrientation() {
+    const { width, height } = this.getRealSize();
+    const wasPortrait = this.isPortrait;
+    this.isPortrait = height > width;
+    return this.isPortrait !== wasPortrait;
+  }
+
+  handleResize(_gameSize) {
+    if (!this.scene.isActive()) return;
+
+    if (this.resizeTimeout) {
+      clearTimeout(this.resizeTimeout);
+    }
+
+    this.resizeTimeout = setTimeout(() => {
+      this.forceLayoutUpdate();
+      this.resizeTimeout = null;
+    }, 100);
+  }
+
+  forceLayoutUpdate() {
+    const wasPortrait = this.isPortrait;
+    this.isPortrait = this.scale.height > this.scale.width;
+
+    if (wasPortrait !== this.isPortrait) {
+      this.rebuildLayout();
+    } else {
+      this.updateLayout();
+    }
+  }
+
+  rebuildLayout() {
+    if (this.bg) this.bg.destroy();
+    if (this.timeoutText) this.timeoutText.destroy();
+    if (this.levelText) this.levelText.destroy();
+    if (this.scoreText) this.scoreText.destroy();
+
+    if (this.recordsButton) this.recordsButton.destroy();
+    if (this.aboutButton) this.aboutButton.destroy();
+
+    this.createBackground();
+    this.createText();
+
+    if (this.cards && this.cards.length > 0) {
+      this.repositionCards();
+    }
+  }
+
+  repositionCards() {
+    this.initCardsPositions();
+    this.applyCardScaling();
+
+    setTimeout(() => {
+      this.cards.forEach((card, index) => {
+        if (this.positions[index]) {
+          card.move({
+            x: this.positions[index].x,
+            y: this.positions[index].y,
+            delay: 0,
+          });
+        }
+      });
+    }, 50);
+  }
+
+  getAdaptiveFontSize(baseSize) {
+    const { width } = this.getRealSize();
+
+    if (width < 400) {
+      return Math.max(baseSize - 8, 16);
+    } else if (width < 600) {
+      return Math.max(baseSize - 4, 20);
+    } else if (width < 800) {
+      return Math.max(baseSize - 2, 24);
+    } else {
+      return baseSize;
+    }
   }
 
   createText() {
     const dpi = window.devicePixelRatio || 1;
+    const { width } = this.getRealSize();
+
+    const fontSize = this.getAdaptiveFontSize(32);
 
     this.timeoutText = this.add
       .text(20, 30, "", {
-        font: "32px GardenFlower",
+        font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
       })
       .setResolution(dpi);
 
     this.levelText = this.add
       .text(20, 70, "", {
-        font: "32px GardenFlower",
+        font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
       })
       .setResolution(dpi);
 
     this.scoreText = this.add
-      .text(this.sys.game.config.width / 2 + 50, 30, "", {
-        font: "32px GardenFlower",
+      .text(width / 2, 30, "", {
+        font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
       })
-      .setOrigin(1, 0)
+      .setOrigin(0.5, 0)
       .setResolution(dpi);
 
     this.createRecordsButton();
@@ -197,6 +311,9 @@ class GameScene extends Phaser.Scene {
     this.updateTexts();
     this.createCards();
     this.initCards();
+
+    this.applyCardScaling();
+
     this.showCards();
 
     if (config.currentLevel === 1) {
@@ -209,35 +326,35 @@ class GameScene extends Phaser.Scene {
 
     if (this.cards) {
       this.cards.forEach((card) => {
-        this.tweens.killTweensOf(card);
+        if (card && card.scene) {
+          this.tweens.killTweensOf(card);
+        }
       });
     }
 
-    let count = 0;
-    let totalCards = this.cards ? this.cards.length : 0;
+    let completed = 0;
+    const totalCards = this.cards ? this.cards.length : 0;
 
     if (totalCards === 0) {
       this.start();
       return;
     }
 
-    let onCardMoveComplete = () => {
-      count += 1;
-      if (count >= totalCards) {
-        this.start();
-      }
-    };
-
     this.cards.forEach((card) => {
       if (card && card.scene) {
+        const screenWidth = this.cameras.main.width;
+        const screenHeight = this.cameras.main.height;
+
         card.move({
-          x: this.sys.game.config.width + card.width,
-          y: this.sys.game.config.height + card.height,
+          x: screenWidth + card.width,
+          y: screenHeight + card.height,
           delay: card.position.delay,
-          callback: onCardMoveComplete,
+          callback: () => {
+            if (++completed >= totalCards) this.start();
+          },
         });
       } else {
-        onCardMoveComplete();
+        if (++completed >= totalCards) this.start();
       }
     });
   }
@@ -261,8 +378,111 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  updateLayout() {
+    const { width, height } = this.getRealSize();
+
+    if (this.bg) {
+      if (this.isPortrait) {
+        this.bg.setDisplaySize(width, height);
+      } else {
+        const scale = Math.max(width / this.bg.width, height / this.bg.height);
+        this.bg.setScale(scale);
+        this.bg.setPosition(
+          (width - this.bg.displayWidth) / 2,
+          (height - this.bg.displayHeight) / 2
+        );
+      }
+    }
+
+    if (this.scoreText) {
+      this.scoreText.setX(width / 2);
+    }
+
+    if (this.recordsButton) {
+      if (this.isPortrait) {
+        this.recordsButton.setPosition(width / 2 - 50, height - 60);
+      } else {
+        this.recordsButton.setPosition(width - 50, 30);
+      }
+    }
+
+    if (this.aboutButton) {
+      if (this.isPortrait) {
+        this.aboutButton.setPosition(width / 2 + 150, height - 60);
+      } else {
+        this.aboutButton.setPosition(width - 190, 30);
+      }
+    }
+
+    if (this.cards && this.cards.length > 0) {
+      this.applyCardScaling();
+
+      setTimeout(() => {
+        this.updateCardPositions();
+      }, 50);
+    }
+  }
+
+  updateCardPositions() {
+    const level = this.getCurrentLevel();
+    const { width, height } = this.getRealSize();
+    const grid = calculateGrid(level.pairs, width, height);
+
+    const cardDimensions = this.getCardDimensions();
+
+    let spacing = cardDimensions.spacing;
+    if (cardDimensions.scale < 0.3) {
+      spacing = Math.max(2, cardDimensions.spacing * cardDimensions.scale);
+    }
+
+    const cardWidth = cardDimensions.width + spacing;
+    const cardHeight = cardDimensions.height + spacing;
+
+    const totalGridWidth = cardWidth * grid.cols - spacing;
+    const totalGridHeight = cardHeight * grid.rows - spacing;
+
+    const offsetX = (width - totalGridWidth) / 2 + cardDimensions.width / 2;
+    const offsetY =
+      (height - totalGridHeight) / 2 + cardDimensions.height / 2 + 30;
+
+    this.cards.forEach((card, index) => {
+      if (card) {
+        const row = Math.floor(index / grid.cols);
+        const col = index % grid.cols;
+
+        this.tweens.add({
+          targets: card,
+          x: offsetX + col * cardWidth,
+          y: offsetY + row * cardHeight,
+          duration: 300,
+          ease: "Power2",
+        });
+      }
+    });
+
+    this.currentCardScale = cardDimensions.scale;
+  }
+
   createBackground() {
-    this.add.sprite(0, 0, "background").setOrigin(0, 0);
+    const { width, height } = this.getRealSize();
+    this.isPortrait = height > width;
+
+    if (this.bg) this.bg.destroy();
+
+    if (this.isPortrait) {
+      this.bg = this.add.sprite(0, 0, "background-portrait").setOrigin(0, 0);
+      this.bg.setDisplaySize(width, height);
+    } else {
+      this.bg = this.add.sprite(0, 0, "background").setOrigin(0, 0);
+
+      const scale = Math.max(width / this.bg.width, height / this.bg.height);
+      this.bg.setScale(scale);
+
+      this.bg.setPosition(
+        (width - this.bg.displayWidth) / 2,
+        (height - this.bg.displayHeight) / 2
+      );
+    }
   }
 
   createCards() {
@@ -280,7 +500,9 @@ class GameScene extends Phaser.Scene {
 
     for (let value = 1; value <= level.pairs; value += 1) {
       for (let i = 0; i < 2; i++) {
-        this.cards.push(new Card(this, value));
+        const card = new Card(this, value);
+        card.setCardScale(this.currentCardScale || 1);
+        this.cards.push(card);
       }
     }
   }
@@ -288,17 +510,27 @@ class GameScene extends Phaser.Scene {
   initCardsPositions() {
     let positions = [];
     const level = this.getCurrentLevel();
-    const grid = calculateGrid(level.pairs);
+    const { width, height } = this.getRealSize();
+    const grid = calculateGrid(level.pairs, width, height);
 
-    let cardTexture = this.textures.get("card").getSourceImage();
-    let cardWidth = cardTexture.width + 5;
-    let cardHeight = cardTexture.height + 5;
-    let offsetX =
-      (this.sys.game.config.width - cardWidth * grid.cols) / 2 + cardWidth / 2;
-    let offsetY =
-      (this.sys.game.config.height - cardHeight * grid.rows) / 2 +
-      cardHeight / 2 +
-      30;
+    const cardDimensions = this.getCardDimensions();
+    this.currentCardScale = cardDimensions.scale;
+
+    let spacing = cardDimensions.spacing;
+    if (cardDimensions.scale < 0.3) {
+      spacing = Math.max(2, cardDimensions.spacing * cardDimensions.scale);
+    }
+
+    const cardWidth = cardDimensions.width + spacing;
+    const cardHeight = cardDimensions.height + spacing;
+
+    const totalGridWidth = cardWidth * grid.cols - spacing;
+    const totalGridHeight = cardHeight * grid.rows - spacing;
+
+    const offsetX = (width - totalGridWidth) / 2 + cardDimensions.width / 2;
+    const offsetY =
+      (height - totalGridHeight) / 2 + cardDimensions.height / 2 + 30;
+
     let id = 0;
 
     for (let row = 0; row < grid.rows; row++) {
@@ -313,6 +545,14 @@ class GameScene extends Phaser.Scene {
     }
 
     this.positions = positions;
+
+    if (this.cards) {
+      this.cards.forEach((card) => {
+        if (card && card.setCardScale) {
+          card.setCardScale(this.currentCardScale);
+        }
+      });
+    }
   }
 
   onCardClicked(_pointer, card) {
@@ -349,46 +589,138 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  getCardDimensions() {
+    const { width, height } = this.getRealSize();
+    const level = this.getCurrentLevel();
+    const grid = calculateGrid(level.pairs, width, height);
+
+    let cardTexture = this.textures.get("card").getSourceImage();
+    let baseCardWidth = cardTexture.width;
+    let baseCardHeight = cardTexture.height;
+
+    const margin = this.isPortrait ? 3 : 5;
+    const topOffset = this.isPortrait ? 100 : 120;
+    const sideMargin = this.isPortrait ? 10 : 20;
+    const bottomMargin = this.isPortrait ? 100 : 60;
+
+    const availableWidth = width - sideMargin * 2;
+    const availableHeight = height - topOffset - bottomMargin;
+
+    const maxCardWidth =
+      (availableWidth - margin * (grid.cols - 1)) / grid.cols;
+    const maxCardHeight =
+      (availableHeight - margin * (grid.rows - 1)) / grid.rows;
+
+    const scaleByWidth = maxCardWidth / baseCardWidth;
+    const scaleByHeight = maxCardHeight / baseCardHeight;
+
+    let minScale, maxScale;
+    if (this.isPortrait) {
+      minScale = 0.12;
+      maxScale = 0.5;
+    } else {
+      minScale = 0.2;
+      maxScale = 1.0;
+    }
+
+    let scale = Math.min(scaleByWidth, scaleByHeight);
+    scale = Math.max(minScale, Math.min(scale, maxScale));
+
+    if (width < 400 && this.isPortrait) {
+      scale = Math.min(scale, 0.25);
+    }
+
+    const finalCardWidth = baseCardWidth * scale;
+    const finalCardHeight = baseCardHeight * scale;
+
+    return {
+      width: finalCardWidth,
+      height: finalCardHeight,
+      scale: scale,
+      spacing: margin,
+    };
+  }
+
+  applyCardScaling() {
+    if (!this.cards || this.cards.length === 0) return;
+
+    const cardDimensions = this.getCardDimensions();
+    this.currentCardScale = cardDimensions.scale;
+
+    this.cards.forEach((card) => {
+      if (card && card.scene) {
+        card.setCardScale(cardDimensions.scale);
+      }
+    });
+  }
+
   createRecordsButton() {
     const dpi = window.devicePixelRatio || 1;
-    const recordsText = this.add
-      .text(1100, 30, "Records", {
-        font: "32px GardenFlower",
+    const { width, height } = this.getRealSize();
+
+    const fontSize = this.getAdaptiveFontSize(32);
+
+    let buttonX, buttonY;
+
+    if (this.isPortrait) {
+      buttonX = width / 2 - 50;
+      buttonY = height - 60;
+    } else {
+      buttonX = width - 50;
+      buttonY = 30;
+    }
+
+    this.recordsButton = this.add
+      .text(buttonX, buttonY, "Records", {
+        font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
       })
       .setOrigin(1, 0)
       .setResolution(dpi)
       .setInteractive()
       .on("pointerover", () => {
-        recordsText.setStyle({ fill: "#FFD700" });
+        this.recordsButton.setStyle({ fill: "#FFD700" });
         this.input.setDefaultCursor("pointer");
       })
       .on("pointerout", () => {
-        recordsText.setStyle({ fill: "#ffffff" });
+        this.recordsButton.setStyle({ fill: "#ffffff" });
         this.input.setDefaultCursor("default");
       })
       .on("pointerdown", () => {
-        event.stopPropagation();
         this.showRecords();
       });
   }
 
   createAboutButton() {
     const dpi = window.devicePixelRatio || 1;
-    const aboutText = this.add
-      .text(1250, 30, "About", {
-        font: "32px GardenFlower",
+    const { width, height } = this.getRealSize();
+
+    const fontSize = this.getAdaptiveFontSize(32);
+
+    let buttonX, buttonY;
+
+    if (this.isPortrait) {
+      buttonX = width / 2 + 150;
+      buttonY = height - 60;
+    } else {
+      buttonX = width - 190;
+      buttonY = 30;
+    }
+
+    this.aboutButton = this.add
+      .text(buttonX, buttonY, "About", {
+        font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
       })
       .setOrigin(1, 0)
       .setResolution(dpi)
       .setInteractive()
       .on("pointerover", () => {
-        aboutText.setStyle({ fill: "#FFD700" });
+        this.aboutButton.setStyle({ fill: "#FFD700" });
         this.input.setDefaultCursor("pointer");
       })
       .on("pointerout", () => {
-        aboutText.setStyle({ fill: "#ffffff" });
+        this.aboutButton.setStyle({ fill: "#ffffff" });
         this.input.setDefaultCursor("default");
       })
       .on("pointerdown", () => {

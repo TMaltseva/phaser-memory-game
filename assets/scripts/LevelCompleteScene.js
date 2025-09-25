@@ -17,15 +17,33 @@ class LevelCompleteScene extends Phaser.Scene {
     this.createButton(dpi);
   }
 
+  getRealSize() {
+    return {
+      width: this.scale.width,
+      height: this.scale.height,
+    };
+  }
+
   createModal() {
-    this.add.rectangle(640, 360, 1280, 720, 0x000000, 0.5);
-    let modal = this.add.image(640, 360, "modalBg");
-    modal.setDisplaySize(700, 400);
+    const { width, height } = this.getRealSize();
+
+    this.add.rectangle(width / 2, height / 2, width, height, 0x000000, 0.5);
+
+    const modalWidth = Math.max(600, width * 0.8);
+    const modalHeight = Math.max(400, height * 0.6);
+
+    let modal = this.add.image(width / 2, height / 2, "modalBg");
+    modal.setDisplaySize(modalWidth, modalHeight);
   }
 
   createTexts(dpi) {
+    const { width, height } = this.getRealSize();
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+
     this.add
-      .text(640, 300, this.message, {
+      .text(centerX, centerY - 80, this.message, {
         font: "38px GardenFlower",
         fill: "#8B4513",
         align: "center",
@@ -35,7 +53,7 @@ class LevelCompleteScene extends Phaser.Scene {
 
     if (!this.isGameComplete) {
       this.add
-        .text(640, 350, "Level Score: " + this.levelScore, {
+        .text(centerX, centerY - 30, "Level Score: " + this.levelScore, {
           font: "24px GardenFlower",
           fill: "#8B4513",
           align: "center",
@@ -45,7 +63,7 @@ class LevelCompleteScene extends Phaser.Scene {
     }
 
     this.add
-      .text(640, 380, "Total Score: " + this.totalScore, {
+      .text(centerX, centerY + 10, "Total Score: " + this.totalScore, {
         font: "24px GardenFlower",
         fill: "#8B4513",
         align: "center",
@@ -55,6 +73,11 @@ class LevelCompleteScene extends Phaser.Scene {
   }
 
   createButton(dpi) {
+    const { width, height } = this.getRealSize();
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0x8b4513);
 
@@ -68,7 +91,10 @@ class LevelCompleteScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setResolution(dpi);
 
-    let buttonContainer = this.add.container(640, 440, [buttonBg, button]);
+    let buttonContainer = this.add.container(centerX, centerY + 80, [
+      buttonBg,
+      button,
+    ]);
     buttonContainer.setSize(200, 60);
     buttonContainer.setInteractive();
 

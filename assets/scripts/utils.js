@@ -1,23 +1,19 @@
-function calculateGrid(pairs) {
+function calculateGrid(pairs, width, height) {
   const totalCards = pairs * 2;
-  let bestRows = 1;
-  let bestCols = totalCards;
-  let bestRatio = totalCards;
+  const isPortrait = height > width;
+  let rows, cols;
 
-  for (let rows = 1; rows <= totalCards; rows++) {
-    if (totalCards % rows === 0) {
-      let cols = totalCards / rows;
-      let ratio = Math.max(rows, cols) / Math.min(rows, cols);
-
-      if (ratio < bestRatio) {
-        bestRatio = ratio;
-        bestRows = rows;
-        bestCols = cols;
-      }
-    }
+  if (isPortrait) {
+    cols = Math.min(2, totalCards);
+    rows = Math.ceil(totalCards / cols);
+  } else {
+    rows = Math.min(2, totalCards);
+    cols = Math.ceil(totalCards / rows);
   }
 
-  return { rows: bestRows, cols: bestCols };
+  const result = { rows, cols };
+
+  return result;
 }
 
 function calculateScore(consecutiveMatches) {

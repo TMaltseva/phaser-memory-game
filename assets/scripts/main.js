@@ -3,11 +3,15 @@ let config = {
   pixelArt: false,
   antialias: true,
   roundPixels: false,
-  width: 1280,
-  height: 720,
+  //   width: 1280,
+  //   height: 720,
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.RESIZE,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+    min: {
+      width: 400,
+      height: 850,
+    },
     zoom: 1 / window.devicePixelRatio,
   },
   render: {

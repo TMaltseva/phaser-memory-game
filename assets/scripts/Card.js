@@ -8,6 +8,8 @@ class Card extends Phaser.GameObjects.Sprite {
 
     this.setInteractive();
     this.opened = false;
+    this.isAnimating = false;
+    this.currentScale = 1;
   }
 
   init(position) {
@@ -31,39 +33,64 @@ class Card extends Phaser.GameObjects.Sprite {
   }
 
   open(callback) {
+    if (this.isAnimating || this.opened) return;
+
+    this.isAnimating = true;
     this.opened = true;
-    this.hide(callback);
+
+    this.hide(() => {
+      this.show(() => {
+        this.isAnimating = false;
+        if (callback) callback();
+      });
+    });
   }
 
-  close() {
-    if (this.opened) {
+  close(callback) {
+    if (!this.opened || this.isAnimating) return;
+
+    this.isAnimating = true;
+
+    this.hide(() => {
       this.opened = false;
-      this.hide();
-    }
+      this.show(() => {
+        this.isAnimating = false;
+        if (callback) callback();
+      });
+    });
   }
 
   hide(callback) {
+    const targetScale = this.scaleX;
+
     this.scene.tweens.add({
       targets: this,
       scaleX: 0,
       ease: "Linear",
-      duration: 200,
-      onComplete: () => this.show(callback),
+      duration: 100,
+      onComplete: () => {
+        if (callback) callback();
+      },
     });
   }
 
   show(callback) {
     let texture = this.opened ? "card" + this.value : "card";
-
     this.setTexture(texture);
+
     this.scene.tweens.add({
       targets: this,
-      scaleX: 1,
+      scaleX: this.currentScale,
       ease: "Linear",
-      duration: 200,
+      duration: 100,
       onComplete: () => {
         if (callback) callback();
       },
     });
+  }
+
+  setCardScale(scale) {
+    this.currentScale = scale;
+    this.setScale(scale);
   }
 }
