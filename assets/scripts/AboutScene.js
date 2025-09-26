@@ -104,15 +104,15 @@ class AboutScene extends Phaser.Scene {
       }
     }
 
-    this.add
-      .text(width / 2, titleY, "How to Play", {
-        font: `${fontSize} GardenFlower`,
-        fill: "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    // this.add
+    //   .text(width / 2, titleY, "How to Play", {
+    //     font: `${fontSize} GardenFlower`,
+    //     fill: "#8B4513",
+    //     align: "center",
+    //     resolution: dpi * 2,
+    //   })
+    //   .setOrigin(0.5)
+    //   .setResolution(dpi * 2);
   }
 
   createRulesText() {

@@ -140,15 +140,15 @@ class RecordsScene extends Phaser.Scene {
       }
     }
 
-    this.add
-      .text(width / 2, titleY, "Best 5 records", {
-        font: `${fontSize} GardenFlower`,
-        fill: "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    // this.add
+    //   .text(width / 2, titleY, "Best 5 records", {
+    //     font: `${fontSize} GardenFlower`,
+    //     fill: "#8B4513",
+    //     align: "center",
+    //     resolution: dpi * 2,
+    //   })
+    //   .setOrigin(0.5)
+    //   .setResolution(dpi * 2);
   }
 
   createTable(dpi) {
@@ -464,7 +464,7 @@ class RecordsScene extends Phaser.Scene {
 
     let rowHeight;
     if (isPortrait) {
-      rowHeight = isSmallScreen ? 25 : isMediumScreen ? 28 : 30;
+      rowHeight = 30;
     } else {
       rowHeight = isSmallScreen ? 28 : isMediumScreen ? 32 : 35;
     }

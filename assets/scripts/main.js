@@ -15,7 +15,7 @@ let config = {
   },
   render: {
     antialias: true,
-    roundPixels: false,
+    roundPixels: true,
     transparent: false,
     clearBeforeRender: true,
     pixelArt: false,
