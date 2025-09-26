@@ -295,7 +295,7 @@ class GameScene extends Phaser.Scene {
     };
 
     const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 50 : 0;
+    const mobileTopOffset = this.isPortrait ? 80 : 0;
     const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     this.timeoutText = this.add
