@@ -25,6 +25,29 @@ let config = {
     maxTextures: 16,
   },
   currentLevel: 1,
+  getLevels: function (isPortrait) {
+    if (isPortrait) {
+      return [
+        { pairs: 2, time: 15 },
+        { pairs: 3, time: 20 },
+        { pairs: 3, time: 15 },
+        { pairs: 4, time: 25 },
+        { pairs: 4, time: 20 },
+        { pairs: 4, time: 15 },
+        { pairs: 4, time: 10 },
+      ];
+    } else {
+      return [
+        { pairs: 2, time: 15 },
+        { pairs: 3, time: 20 },
+        { pairs: 4, time: 25 },
+        { pairs: 5, time: 30 },
+        { pairs: 5, time: 25 },
+        { pairs: 5, time: 20 },
+        { pairs: 5, time: 15 },
+      ];
+    }
+  },
   levels: [
     { pairs: 2, time: 15 },
     { pairs: 3, time: 20 },

@@ -33,7 +33,8 @@ class GameScene extends Phaser.Scene {
   }
 
   getCurrentLevel() {
-    return config.levels[config.currentLevel - 1];
+    const levels = config.getLevels(this.isPortrait);
+    return levels[config.currentLevel - 1];
   }
 
   nextLevel() {
@@ -43,7 +44,8 @@ class GameScene extends Phaser.Scene {
     this.totalScore += this.levelScore;
     this.scoreText.setText("Score: " + this.totalScore);
 
-    if (config.currentLevel < config.levels.length) {
+    const levels = config.getLevels(this.isPortrait);
+    if (config.currentLevel < levels.length) {
       config.currentLevel += 1;
       this.scene.pause();
       this.scene.launch("LevelComplete", {
@@ -229,7 +231,11 @@ class GameScene extends Phaser.Scene {
     this.createText();
 
     if (this.cards && this.cards.length > 0) {
-      this.repositionCards();
+      this.createCards();
+      this.initCardsPositions();
+      this.initCards();
+      this.applyCardScaling();
+      this.showCards();
     }
   }
 
