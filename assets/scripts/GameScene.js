@@ -249,45 +249,58 @@ class GameScene extends Phaser.Scene {
 
   getAdaptiveFontSize(baseSize) {
     const { width } = this.getRealSize();
-
     if (width < 400) {
-      return Math.max(baseSize - 8, 16);
+      return Math.max(baseSize - 10, 16);
     } else if (width < 600) {
-      return Math.max(baseSize - 4, 20);
+      return Math.max(baseSize - 6, 20);
     } else if (width < 800) {
-      return Math.max(baseSize - 2, 24);
+      return Math.max(baseSize - 4, 24);
     } else {
       return baseSize;
     }
   }
 
   createText() {
-    const dpi = window.devicePixelRatio || 1;
-    const { width } = this.getRealSize();
+    const dpi = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+    const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);
 
+    const textStyle = {
+      font: `${fontSize}px GardenFlower`,
+      fill: "#ffffff",
+      resolution: dpi * 2,
+      stroke: "#000000",
+      strokeThickness: 2,
+      shadow: {
+        offsetX: 1,
+        offsetY: 1,
+        color: "#000000",
+        blur: 2,
+        stroke: true,
+        fill: true,
+      },
+    };
+
+    const safePadding = 5;
+    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileLeftOffset = this.isPortrait ? 20 : 5;
+
     this.timeoutText = this.add
-      .text(20, 30, "", {
-        font: `${fontSize}px GardenFlower`,
-        fill: "#ffffff",
-      })
-      .setResolution(dpi);
+      .text(mobileLeftOffset, 10 + safePadding + mobileTopOffset, "", textStyle)
+      .setResolution(dpi * 2)
+      .setDepth(10);
 
     this.levelText = this.add
-      .text(20, 70, "", {
-        font: `${fontSize}px GardenFlower`,
-        fill: "#ffffff",
-      })
-      .setResolution(dpi);
+      .text(mobileLeftOffset, 50 + safePadding + mobileTopOffset, "", textStyle)
+      .setResolution(dpi * 2)
+      .setDepth(10);
 
     this.scoreText = this.add
-      .text(width / 2, 30, "", {
-        font: `${fontSize}px GardenFlower`,
-        fill: "#ffffff",
-      })
+      .text(width / 2, 10 + safePadding + mobileTopOffset, "", textStyle)
       .setOrigin(0.5, 0)
-      .setResolution(dpi);
+      .setResolution(dpi * 2)
+      .setDepth(10);
 
     this.createRecordsButton();
     this.createAboutButton();
@@ -395,13 +408,31 @@ class GameScene extends Phaser.Scene {
       }
     }
 
+    const safePadding = 5;
+    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileLeftOffset = this.isPortrait ? 20 : 5;
+
+    if (this.timeoutText) {
+      this.timeoutText.setX(mobileLeftOffset);
+      this.timeoutText.setY(10 + safePadding + mobileTopOffset);
+    }
+
+    if (this.levelText) {
+      this.levelText.setX(mobileLeftOffset);
+      this.levelText.setY(50 + safePadding + mobileTopOffset);
+    }
+
     if (this.scoreText) {
       this.scoreText.setX(width / 2);
+      this.scoreText.setY(10 + safePadding + mobileTopOffset);
     }
 
     if (this.recordsButton) {
       if (this.isPortrait) {
-        this.recordsButton.setPosition(width / 2 - 50, height - 60);
+        this.recordsButton.setPosition(
+          width - mobileLeftOffset,
+          10 + safePadding + mobileTopOffset
+        );
       } else {
         this.recordsButton.setPosition(width - 50, 30);
       }
@@ -409,7 +440,10 @@ class GameScene extends Phaser.Scene {
 
     if (this.aboutButton) {
       if (this.isPortrait) {
-        this.aboutButton.setPosition(width / 2 + 150, height - 60);
+        this.aboutButton.setPosition(
+          width - mobileLeftOffset,
+          50 + safePadding + mobileTopOffset
+        );
       } else {
         this.aboutButton.setPosition(width - 190, 30);
       }
@@ -669,12 +703,15 @@ class GameScene extends Phaser.Scene {
     const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);
+    const safePadding = 5;
+    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     let buttonX, buttonY;
 
     if (this.isPortrait) {
-      buttonX = width / 2 - 50;
-      buttonY = height - 60;
+      buttonX = width - mobileLeftOffset;
+      buttonY = 10 + safePadding + mobileTopOffset;
     } else {
       buttonX = width - 50;
       buttonY = 30;
@@ -684,9 +721,20 @@ class GameScene extends Phaser.Scene {
       .text(buttonX, buttonY, "Records", {
         font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
+        resolution: dpi * 2,
+        stroke: "#000000",
+        strokeThickness: 2,
+        shadow: {
+          offsetX: 1,
+          offsetY: 1,
+          color: "#000000",
+          blur: 2,
+          stroke: true,
+          fill: true,
+        },
       })
       .setOrigin(1, 0)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive()
       .on("pointerover", () => {
         this.recordsButton.setStyle({ fill: "#FFD700" });
@@ -706,12 +754,15 @@ class GameScene extends Phaser.Scene {
     const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);
+    const safePadding = 5;
+    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     let buttonX, buttonY;
 
     if (this.isPortrait) {
-      buttonX = width / 2 + 150;
-      buttonY = height - 60;
+      buttonX = width - mobileLeftOffset;
+      buttonY = 50 + safePadding + mobileTopOffset;
     } else {
       buttonX = width - 190;
       buttonY = 30;
@@ -721,9 +772,20 @@ class GameScene extends Phaser.Scene {
       .text(buttonX, buttonY, "About", {
         font: `${fontSize}px GardenFlower`,
         fill: "#ffffff",
+        resolution: dpi * 2,
+        stroke: "#000000",
+        strokeThickness: 2,
+        shadow: {
+          offsetX: 1,
+          offsetY: 1,
+          color: "#000000",
+          blur: 2,
+          stroke: true,
+          fill: true,
+        },
       })
       .setOrigin(1, 0)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive()
       .on("pointerover", () => {
         this.aboutButton.setStyle({ fill: "#FFD700" });
