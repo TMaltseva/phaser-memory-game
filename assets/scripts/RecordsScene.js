@@ -464,7 +464,7 @@ class RecordsScene extends Phaser.Scene {
 
     let rowHeight;
     if (isPortrait) {
-      rowHeight = 30;
+      rowHeight = 40;
     } else {
       rowHeight = isSmallScreen ? 28 : isMediumScreen ? 32 : 35;
     }
