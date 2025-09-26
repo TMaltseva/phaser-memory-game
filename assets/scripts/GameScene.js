@@ -295,7 +295,7 @@ class GameScene extends Phaser.Scene {
     };
 
     const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileTopOffset = this.isPortrait ? 50 : 0;
     const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     this.timeoutText = this.add
@@ -421,7 +421,7 @@ class GameScene extends Phaser.Scene {
     }
 
     const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileTopOffset = this.isPortrait ? 50 : 0;
     const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     if (this.timeoutText) {
@@ -727,7 +727,7 @@ class GameScene extends Phaser.Scene {
 
     const fontSize = this.getAdaptiveFontSize(32);
     const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileTopOffset = this.isPortrait ? 50 : 0;
     const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     let buttonX, buttonY;
@@ -781,7 +781,7 @@ class GameScene extends Phaser.Scene {
 
     const fontSize = this.getAdaptiveFontSize(32);
     const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 30 : 0;
+    const mobileTopOffset = this.isPortrait ? 50 : 0;
     const mobileLeftOffset = this.isPortrait ? 20 : 5;
 
     let buttonX, buttonY;
