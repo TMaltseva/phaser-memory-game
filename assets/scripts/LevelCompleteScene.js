@@ -11,10 +11,19 @@ class LevelCompleteScene extends Phaser.Scene {
   }
 
   create() {
-    const dpi = window.devicePixelRatio || 1;
+    const dpi = this.getImprovedDPI();
     this.createModal();
     this.createTexts(dpi);
     this.createButton(dpi);
+  }
+
+  getImprovedDPI() {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    return isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
   }
 
   getRealSize() {
@@ -47,9 +56,10 @@ class LevelCompleteScene extends Phaser.Scene {
         font: "38px GardenFlower",
         fill: "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     if (!this.isGameComplete) {
       this.add
@@ -57,9 +67,10 @@ class LevelCompleteScene extends Phaser.Scene {
           font: "24px GardenFlower",
           fill: "#8B4513",
           align: "center",
+          resolution: dpi * 2,
         })
         .setOrigin(0.5)
-        .setResolution(dpi);
+        .setResolution(dpi * 2);
     }
 
     this.add
@@ -67,9 +78,10 @@ class LevelCompleteScene extends Phaser.Scene {
         font: "24px GardenFlower",
         fill: "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
   }
 
   createButton(dpi) {
@@ -87,9 +99,10 @@ class LevelCompleteScene extends Phaser.Scene {
         font: "28px GardenFlower",
         fill: "#ffffff",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     let buttonContainer = this.add.container(centerX, centerY + 80, [
       buttonBg,

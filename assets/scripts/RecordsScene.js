@@ -15,12 +15,21 @@ class RecordsScene extends Phaser.Scene {
 
   create() {
     this.scale.on("resize", this.handleResize, this);
-    const dpi = window.devicePixelRatio || 1;
+    const dpi = this.getImprovedDPI();
     this.createModal();
     this.createTitle(dpi);
     this.createTable(dpi);
     this.createClearButton(dpi);
     this.createCloseButton(dpi);
+  }
+
+  getImprovedDPI() {
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    return isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
   }
 
   getRealSize() {
@@ -37,7 +46,7 @@ class RecordsScene extends Phaser.Scene {
     this.tableContainer = null;
     this.headersContainer = null;
 
-    const dpi = window.devicePixelRatio || 1;
+    const dpi = this.getImprovedDPI();
     this.createModal();
     this.createTitle(dpi);
     this.createTable(dpi);
@@ -136,9 +145,10 @@ class RecordsScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
   }
 
   createTable(dpi) {
@@ -239,9 +249,10 @@ class RecordsScene extends Phaser.Scene {
           font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
+          resolution: dpi * 2,
         })
         .setOrigin(0.5)
-        .setResolution(dpi)
+        .setResolution(dpi * 2)
     );
 
     const timeHeader = this.add
@@ -249,9 +260,10 @@ class RecordsScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: this.sortBy === "time" ? "#FFD700" : "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive();
 
     timeHeader.on("pointerover", () => {
@@ -292,9 +304,10 @@ class RecordsScene extends Phaser.Scene {
             font: `${arrowFontSize} GardenFlower`,
             fill: "#FFD700",
             align: "center",
+            resolution: dpi * 2,
           })
           .setOrigin(0.5)
-          .setResolution(dpi)
+          .setResolution(dpi * 2)
       );
     }
 
@@ -303,9 +316,10 @@ class RecordsScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: this.sortBy === "score" ? "#FFD700" : "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive();
 
     scoreHeader.on("pointerover", () => {
@@ -346,9 +360,10 @@ class RecordsScene extends Phaser.Scene {
             font: `${arrowFontSize} GardenFlower`,
             fill: "#FFD700",
             align: "center",
+            resolution: dpi * 2,
           })
           .setOrigin(0.5)
-          .setResolution(dpi)
+          .setResolution(dpi * 2)
       );
     }
   }
@@ -392,9 +407,10 @@ class RecordsScene extends Phaser.Scene {
             fill: "#8B4513",
             align: "center",
             lineSpacing: 8,
+            resolution: dpi * 2,
           })
           .setOrigin(0.5)
-          .setResolution(dpi)
+          .setResolution(dpi * 2)
       );
       return;
     }
@@ -467,9 +483,10 @@ class RecordsScene extends Phaser.Scene {
           font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
+          resolution: dpi * 2,
         })
         .setOrigin(0.5)
-        .setResolution(dpi)
+        .setResolution(dpi * 2)
         .setAlpha(0);
 
       const timeText = this.add
@@ -477,9 +494,10 @@ class RecordsScene extends Phaser.Scene {
           font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
+          resolution: dpi * 2,
         })
         .setOrigin(0.5)
-        .setResolution(dpi)
+        .setResolution(dpi * 2)
         .setAlpha(0);
 
       const scoreText = this.add
@@ -487,9 +505,10 @@ class RecordsScene extends Phaser.Scene {
           font: `${fontSize} GardenFlower`,
           fill: "#8B4513",
           align: "center",
+          resolution: dpi * 2,
         })
         .setOrigin(0.5)
-        .setResolution(dpi)
+        .setResolution(dpi * 2)
         .setAlpha(0);
 
       this.tableContainer.add(dateText);
@@ -565,9 +584,10 @@ class RecordsScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: "#ffffff",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     let buttonContainer = this.add.container(clearButtonX, buttonY, [
       buttonBg,
@@ -637,9 +657,10 @@ class RecordsScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: "#ffffff",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     let buttonContainer = this.add.container(closeButtonX, buttonY, [
       buttonBg,
@@ -824,9 +845,10 @@ class RecordsScene extends Phaser.Scene {
         font: isPortrait ? "20px GardenFlower" : "24px GardenFlower",
         fill: "#ffffff",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     const buttonY = height / 2 + 30;
     const yesButtonX = isPortrait ? width / 2 - 50 : width / 2 - 60;
@@ -837,9 +859,10 @@ class RecordsScene extends Phaser.Scene {
         font: "28px GardenFlower",
         fill: "#FFD700",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive();
 
     const noButton = this.add
@@ -847,9 +870,10 @@ class RecordsScene extends Phaser.Scene {
         font: "28px GardenFlower",
         fill: "#FFD700",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(dpi)
+      .setResolution(dpi * 2)
       .setInteractive();
 
     yesButton.on("pointerdown", () => {

@@ -88,7 +88,10 @@ class GameScene extends Phaser.Scene {
   }
 
   showPointsAnimation(points) {
-    const dpi = window.devicePixelRatio || 1;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = this.isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
 
     const pointsText = this.add
@@ -99,7 +102,7 @@ class GameScene extends Phaser.Scene {
         strokeThickness: 3,
       })
       .setOrigin(0.5, 0.5)
-      .setResolution(dpi);
+      .setResolution(dpi * 2);
 
     pointsText.setDepth(1000);
 
@@ -261,7 +264,10 @@ class GameScene extends Phaser.Scene {
   }
 
   createText() {
-    const dpi = Math.max(1, Math.min(window.devicePixelRatio || 1, 3));
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = this.isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);
@@ -674,6 +680,14 @@ class GameScene extends Phaser.Scene {
       scale *= 1.2;
     }
 
+    if (this.isPortrait && width < 400 && config.currentLevel === 1) {
+      scale *= 0.85;
+    }
+
+    if (this.isPortrait && level.pairs >= 4) {
+      scale *= 0.8;
+    }
+
     const finalCardWidth = baseCardWidth * scale;
     const finalCardHeight = baseCardHeight * scale;
 
@@ -699,7 +713,10 @@ class GameScene extends Phaser.Scene {
   }
 
   createRecordsButton() {
-    const dpi = window.devicePixelRatio || 1;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = this.isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);
@@ -750,7 +767,10 @@ class GameScene extends Phaser.Scene {
   }
 
   createAboutButton() {
-    const dpi = window.devicePixelRatio || 1;
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = this.isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
 
     const fontSize = this.getAdaptiveFontSize(32);

@@ -73,6 +73,11 @@ class AboutScene extends Phaser.Scene {
     const isSmallScreen = width < 480;
     const isMediumScreen = width >= 480 && width < 768;
 
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
+
     let fontSize, titleY;
 
     if (isPortrait) {
@@ -104,9 +109,10 @@ class AboutScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: "#8B4513",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(window.devicePixelRatio || 1);
+      .setResolution(dpi * 2);
   }
 
   createRulesText() {
@@ -114,6 +120,11 @@ class AboutScene extends Phaser.Scene {
     const isPortrait = height > width;
     const isSmallScreen = width < 480;
     const isMediumScreen = width >= 480 && width < 768;
+
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
 
     const rulesText = `Complete all with increasing difficulty.
     Make a mistake? Your streak resets!
@@ -164,9 +175,10 @@ class AboutScene extends Phaser.Scene {
         align: "center",
         lineSpacing: lineSpacing,
         wordWrap: { width: textWidth },
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(window.devicePixelRatio || 1);
+      .setResolution(dpi * 2);
   }
 
   createCloseButton() {
@@ -174,6 +186,11 @@ class AboutScene extends Phaser.Scene {
     const isPortrait = height > width;
     const isSmallScreen = width < 480;
     const isMediumScreen = width >= 480 && width < 768;
+
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const dpi = isPortrait
+      ? Math.max(2, Math.min(devicePixelRatio, 4))
+      : Math.max(1, Math.min(devicePixelRatio, 3));
 
     let buttonY, buttonWidth, buttonHeight, fontSize;
 
@@ -221,9 +238,10 @@ class AboutScene extends Phaser.Scene {
         font: `${fontSize} GardenFlower`,
         fill: "#ffffff",
         align: "center",
+        resolution: dpi * 2,
       })
       .setOrigin(0.5)
-      .setResolution(window.devicePixelRatio || 1);
+      .setResolution(dpi * 2);
 
     let buttonContainer = this.add.container(width / 2, buttonY, [
       buttonBg,
