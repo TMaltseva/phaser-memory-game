@@ -196,7 +196,7 @@ class AboutScene extends Phaser.Scene {
 
     if (isPortrait) {
       if (isSmallScreen) {
-        buttonY = height * 0.7;
+        buttonY = height * 0.65;
         buttonWidth = 120;
         buttonHeight = 45;
         fontSize = "20px";
