@@ -4,8 +4,13 @@ function calculateGrid(pairs, width, height) {
   let rows, cols;
 
   if (isPortrait) {
-    cols = Math.min(2, totalCards);
-    rows = Math.ceil(totalCards / cols);
+    if (totalCards <= 4) {
+      cols = 2;
+      rows = Math.ceil(totalCards / cols);
+    } else {
+      cols = 3;
+      rows = Math.ceil(totalCards / cols);
+    }
   } else {
     rows = Math.min(2, totalCards);
     cols = Math.ceil(totalCards / rows);

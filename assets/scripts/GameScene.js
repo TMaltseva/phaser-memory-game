@@ -300,7 +300,6 @@ class GameScene extends Phaser.Scene {
   }
 
   start() {
-    this.initCardsPositions();
     const level = this.getCurrentLevel();
     this.timeout = level.time;
     this.openedCard = null;
@@ -309,7 +308,9 @@ class GameScene extends Phaser.Scene {
     this.levelScore = 0;
     this.timer.paused = false;
     this.updateTexts();
+
     this.createCards();
+    this.initCardsPositions();
     this.initCards();
 
     this.applyCardScaling();
@@ -427,6 +428,7 @@ class GameScene extends Phaser.Scene {
     const level = this.getCurrentLevel();
     const { width, height } = this.getRealSize();
     const grid = calculateGrid(level.pairs, width, height);
+    const totalCards = level.pairs * 2;
 
     const cardDimensions = this.getCardDimensions();
 
@@ -446,7 +448,7 @@ class GameScene extends Phaser.Scene {
       (height - totalGridHeight) / 2 + cardDimensions.height / 2 + 30;
 
     this.cards.forEach((card, index) => {
-      if (card) {
+      if (card && index < totalCards) {
         const row = Math.floor(index / grid.cols);
         const col = index % grid.cols;
 
@@ -512,6 +514,7 @@ class GameScene extends Phaser.Scene {
     const level = this.getCurrentLevel();
     const { width, height } = this.getRealSize();
     const grid = calculateGrid(level.pairs, width, height);
+    const totalCards = level.pairs * 2;
 
     const cardDimensions = this.getCardDimensions();
     this.currentCardScale = cardDimensions.scale;
@@ -533,15 +536,15 @@ class GameScene extends Phaser.Scene {
 
     let id = 0;
 
-    for (let row = 0; row < grid.rows; row++) {
-      for (let col = 0; col < grid.cols; col++) {
-        id++;
-        positions.push({
-          delay: id * 100,
-          x: offsetX + col * cardWidth,
-          y: offsetY + row * cardHeight,
-        });
-      }
+    for (let i = 0; i < totalCards; i++) {
+      const row = Math.floor(i / grid.cols);
+      const col = i % grid.cols;
+      id++;
+      positions.push({
+        delay: id * 100,
+        x: offsetX + col * cardWidth,
+        y: offsetY + row * cardHeight,
+      });
     }
 
     this.positions = positions;
@@ -593,6 +596,7 @@ class GameScene extends Phaser.Scene {
     const { width, height } = this.getRealSize();
     const level = this.getCurrentLevel();
     const grid = calculateGrid(level.pairs, width, height);
+    const totalCards = level.pairs * 2;
 
     let cardTexture = this.textures.get("card").getSourceImage();
     let baseCardWidth = cardTexture.width;
@@ -614,20 +618,26 @@ class GameScene extends Phaser.Scene {
     const scaleByWidth = maxCardWidth / baseCardWidth;
     const scaleByHeight = maxCardHeight / baseCardHeight;
 
-    let minScale, maxScale;
-    if (this.isPortrait) {
-      minScale = 0.12;
-      maxScale = 0.5;
-    } else {
-      minScale = 0.2;
-      maxScale = 1.0;
+    let scale = Math.min(scaleByWidth, scaleByHeight);
+
+    if (totalCards > 4) {
+      const extraCards = totalCards - 4;
+      const reductionFactor = Math.max(0.92, 1 - (extraCards / 2) * 0.015);
+      scale *= reductionFactor;
     }
 
-    let scale = Math.min(scaleByWidth, scaleByHeight);
-    scale = Math.max(minScale, Math.min(scale, maxScale));
+    if (this.isPortrait) {
+      scale = Math.max(0.28, Math.min(scale, 0.9));
+    } else {
+      scale = Math.max(0.35, Math.min(scale, 1.8));
+    }
 
-    if (width < 400 && this.isPortrait) {
-      scale = Math.min(scale, 0.25);
+    if (totalCards >= 6 && totalCards <= 8) {
+      scale *= 1.1;
+    }
+
+    if (width < 500 && config.currentLevel >= 4) {
+      scale *= 1.2;
     }
 
     const finalCardWidth = baseCardWidth * scale;

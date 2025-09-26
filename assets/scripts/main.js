@@ -1,5 +1,5 @@
 let config = {
-  type: Phaser.AUTO,
+  type: Phaser.WEBGL,
   pixelArt: false,
   antialias: true,
   roundPixels: false,
@@ -12,15 +12,15 @@ let config = {
       width: 400,
       height: 850,
     },
-    zoom: 1 / window.devicePixelRatio,
   },
   render: {
     antialias: true,
-    roundPixels: false,
+    roundPixels: true,
     transparent: false,
     clearBeforeRender: true,
     pixelArt: false,
     antialiasGL: true,
+    powerPreference: "high-performance",
   },
   currentLevel: 1,
   levels: [
