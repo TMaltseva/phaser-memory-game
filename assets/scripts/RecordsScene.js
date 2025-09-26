@@ -510,7 +510,9 @@ class RecordsScene extends Phaser.Scene {
   }
 
   updateTable() {
-    const { height } = this.getRealSize();
+    const { width, height } = this.getRealSize();
+    const isPortrait = height > width;
+    const isSmallScreen = width < 480;
 
     if (this.tableContainer) {
       this.tableContainer.destroy();
@@ -521,8 +523,25 @@ class RecordsScene extends Phaser.Scene {
 
     this.tableContainer = this.add.container(0, 0);
 
-    const headerY = height * 0.25;
-    const dataStartY = height * 0.35;
+    let headerY, dataStartY;
+
+    if (isPortrait) {
+      if (isSmallScreen) {
+        headerY = height * 0.32;
+        dataStartY = headerY + 35;
+      } else {
+        headerY = height * 0.33;
+        dataStartY = headerY + 40;
+      }
+    } else {
+      if (isSmallScreen) {
+        headerY = height * 0.3;
+        dataStartY = headerY + 40;
+      } else {
+        headerY = height * 0.32;
+        dataStartY = headerY + 50;
+      }
+    }
 
     this.createTableHeaders(headerY);
     this.createTableData(dataStartY);

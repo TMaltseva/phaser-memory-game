@@ -88,7 +88,7 @@ class AboutScene extends Phaser.Scene {
 
   createRulesText() {
     const pos = TextUtils.getResponsivePositions(this);
-    const textY = pos.isPortrait ? pos.center.y * 0.6 : pos.center.y;
+    const textY = pos.isPortrait ? pos.center.y * 0.9 : pos.center.y;
 
     const rulesText = `Complete all with increasing difficulty.
   Make a mistake? Your streak resets!
@@ -100,7 +100,7 @@ class AboutScene extends Phaser.Scene {
       : Math.min(width * 0.7, 800);
     const lineSpacing = pos.isSmallScreen ? 8 : 12;
 
-    TextUtils.createModalText(this, pos.center.x, textY, rulesText, 18)
+    TextUtils.createModalText(this, pos.center.x, textY, rulesText, 24)
       .setOrigin(0.5)
       .setStyle({
         lineSpacing: lineSpacing,
