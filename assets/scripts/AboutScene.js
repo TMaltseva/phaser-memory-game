@@ -6,7 +6,7 @@ class AboutScene extends Phaser.Scene {
   create() {
     this.scale.on("resize", this.handleResize, this);
     this.createModal();
-    this.createTitle();
+    // this.createTitle();
     this.createRulesText();
     this.createCloseButton();
   }
@@ -67,181 +67,89 @@ class AboutScene extends Phaser.Scene {
     modal.setDisplaySize(modalWidth, modalHeight);
   }
 
+  drawButton(graphics, color, width = 140, height = 50) {
+    graphics.clear();
+    graphics.fillStyle(color);
+    graphics.fillRoundedRect(-width / 2, -height / 2, width, height, 25);
+  }
+
   createTitle() {
-    const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+    const pos = TextUtils.getResponsivePositions(this);
+    const titleY = pos.isPortrait ? pos.center.y * 0.4 : pos.center.y * 0.35;
 
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
-
-    let fontSize, titleY;
-
-    if (isPortrait) {
-      if (isSmallScreen) {
-        fontSize = "22px";
-        titleY = height * 0.23;
-      } else if (isMediumScreen) {
-        fontSize = "24px";
-        titleY = height * 0.23;
-      } else {
-        fontSize = "28px";
-        titleY = height * 0.2;
-      }
-    } else {
-      if (isSmallScreen) {
-        fontSize = "24px";
-        titleY = height * 0.18;
-      } else if (isMediumScreen) {
-        fontSize = "28px";
-        titleY = height * 0.23;
-      } else {
-        fontSize = "36px";
-        titleY = height * 0.22;
-      }
-    }
-
-    // this.add
-    //   .text(width / 2, titleY, "How to Play", {
-    //     font: `${fontSize} GardenFlower`,
-    //     fill: "#8B4513",
-    //     align: "center",
-    //     resolution: dpi * 2,
-    //   })
-    //   .setOrigin(0.5)
-    //   .setResolution(dpi * 2);
+    TextUtils.createModalTitle(
+      this,
+      pos.center.x,
+      titleY,
+      "How to Play",
+      28
+    ).setOrigin(0.5);
   }
 
   createRulesText() {
-    const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
-
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
+    const pos = TextUtils.getResponsivePositions(this);
+    const textY = pos.isPortrait ? pos.center.y * 0.6 : pos.center.y;
 
     const rulesText = `Complete all with increasing difficulty.
-    Make a mistake? Your streak resets!
-    Points count only when you complete the level.`;
+  Make a mistake? Your streak resets!
+  Points count only when you complete the level.`;
 
-    let fontSize, textWidth, textY, lineSpacing;
+    const { width } = this.scale;
+    const textWidth = pos.isPortrait
+      ? width * 0.85
+      : Math.min(width * 0.7, 800);
+    const lineSpacing = pos.isSmallScreen ? 8 : 12;
 
-    if (isPortrait) {
-      if (isSmallScreen) {
-        fontSize = "18px";
-        textWidth = width * 0.88;
-        textY = height * 0.48;
-        lineSpacing = 8;
-      } else if (isMediumScreen) {
-        fontSize = "18px";
-        textWidth = width * 0.85;
-        textY = height * 0.5;
-        lineSpacing = 10;
-      } else {
-        fontSize = "22px";
-        textWidth = width * 0.82;
-        textY = height * 0.52;
-        lineSpacing = 12;
-      }
-    } else {
-      if (isSmallScreen) {
-        fontSize = "20px";
-        textWidth = Math.min(width * 0.75, 600);
-        textY = height * 0.48;
-        lineSpacing = 10;
-      } else if (isMediumScreen) {
-        fontSize = "18px";
-        textWidth = Math.min(width * 0.7, 700);
-        textY = height * 0.5;
-        lineSpacing = 11;
-      } else {
-        fontSize = "24px";
-        textWidth = Math.min(width * 0.65, 800);
-        textY = height * 0.52;
-        lineSpacing = 12;
-      }
-    }
-
-    this.add
-      .text(width / 2, textY, rulesText, {
-        font: `${fontSize} GardenFlower`,
-        fill: "#8B4513",
-        align: "center",
+    TextUtils.createModalText(this, pos.center.x, textY, rulesText, 18)
+      .setOrigin(0.5)
+      .setStyle({
         lineSpacing: lineSpacing,
         wordWrap: { width: textWidth },
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+      });
   }
 
   createCloseButton() {
     const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
-
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
+    const pos = TextUtils.getResponsivePositions(this);
 
     let buttonY, buttonWidth, buttonHeight, fontSize;
 
-    if (isPortrait) {
-      if (isSmallScreen) {
+    if (pos.isPortrait) {
+      if (pos.isSmallScreen) {
         buttonY = height * 0.65;
         buttonWidth = 120;
         buttonHeight = 45;
-        fontSize = "20px";
-      } else if (isMediumScreen) {
+        fontSize = 20;
+      } else {
         buttonY = height * 0.7;
         buttonWidth = 140;
         buttonHeight = 50;
-        fontSize = "22px";
-      } else {
-        buttonY = height * 0.75;
-        buttonWidth = 160;
-        buttonHeight = 60;
-        fontSize = "28px";
+        fontSize = 22;
       }
     } else {
-      if (isSmallScreen) {
+      if (pos.isSmallScreen) {
         buttonY = height * 0.75;
         buttonWidth = 120;
         buttonHeight = 45;
-        fontSize = "20px";
-      } else if (isMediumScreen) {
+        fontSize = 20;
+      } else {
         buttonY = height * 0.7;
         buttonWidth = 140;
         buttonHeight = 50;
-        fontSize = "22px";
-      } else {
-        buttonY = height * 0.7;
-        buttonWidth = 160;
-        buttonHeight = 60;
-        fontSize = "28px";
+        fontSize = 22;
       }
     }
 
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
 
-    let button = this.add
-      .text(0, 3, "Close", {
-        font: `${fontSize} GardenFlower`,
-        fill: "#ffffff",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    let button = TextUtils.createButtonText(
+      this,
+      0,
+      3,
+      "Close",
+      fontSize
+    ).setOrigin(0.5);
 
     let buttonContainer = this.add.container(width / 2, buttonY, [
       buttonBg,
@@ -250,19 +158,15 @@ class AboutScene extends Phaser.Scene {
     buttonContainer.setSize(buttonWidth, buttonHeight);
     buttonContainer.setInteractive();
 
-    this.setupButtonEvents(buttonContainer, buttonBg);
+    this.setupButtonEvents(
+      buttonContainer,
+      buttonBg,
+      buttonWidth,
+      buttonHeight
+    );
   }
 
-  drawButton(graphics, color, width = 160, height = 60) {
-    graphics.clear();
-    graphics.fillStyle(color);
-    graphics.fillRoundedRect(-width / 2, -height / 2, width, height, 25);
-  }
-
-  setupButtonEvents(container, buttonBg) {
-    const buttonWidth = container.width;
-    const buttonHeight = container.height;
-
+  setupButtonEvents(container, buttonBg, buttonWidth, buttonHeight) {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);

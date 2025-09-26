@@ -15,21 +15,11 @@ class RecordsScene extends Phaser.Scene {
 
   create() {
     this.scale.on("resize", this.handleResize, this);
-    const dpi = this.getImprovedDPI();
     this.createModal();
-    this.createTitle(dpi);
-    this.createTable(dpi);
-    this.createClearButton(dpi);
-    this.createCloseButton(dpi);
-  }
-
-  getImprovedDPI() {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    return isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
+    // this.createTitle();
+    this.createTable();
+    this.createClearButton();
+    this.createCloseButton();
   }
 
   getRealSize() {
@@ -46,12 +36,11 @@ class RecordsScene extends Phaser.Scene {
     this.tableContainer = null;
     this.headersContainer = null;
 
-    const dpi = this.getImprovedDPI();
     this.createModal();
-    this.createTitle(dpi);
-    this.createTable(dpi);
-    this.createClearButton(dpi);
-    this.createCloseButton(dpi);
+    this.createTitle();
+    this.createTable();
+    this.createClearButton();
+    this.createCloseButton();
   }
 
   loadRecords() {
@@ -108,50 +97,20 @@ class RecordsScene extends Phaser.Scene {
     modal.setDisplaySize(modalWidth, modalHeight);
   }
 
-  createTitle(dpi) {
-    const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+  createTitle() {
+    const pos = TextUtils.getResponsivePositions(this);
+    const titleY = pos.isPortrait ? pos.center.y * 0.48 : pos.center.y * 0.36;
 
-    let fontSize, titleY;
-
-    if (isPortrait) {
-      if (isSmallScreen) {
-        fontSize = "24px";
-        titleY = height * 0.24;
-      } else if (isMediumScreen) {
-        fontSize = "28px";
-        titleY = height * 0.23;
-      } else {
-        fontSize = "32px";
-        titleY = height * 0.235;
-      }
-    } else {
-      if (isSmallScreen) {
-        fontSize = "28px";
-        titleY = height * 0.2;
-      } else if (isMediumScreen) {
-        fontSize = "30px";
-        titleY = height * 0.23;
-      } else {
-        fontSize = "36px";
-        titleY = height * 0.18;
-      }
-    }
-
-    // this.add
-    //   .text(width / 2, titleY, "Best 5 records", {
-    //     font: `${fontSize} GardenFlower`,
-    //     fill: "#8B4513",
-    //     align: "center",
-    //     resolution: dpi * 2,
-    //   })
-    //   .setOrigin(0.5)
-    //   .setResolution(dpi * 2);
+    TextUtils.createModalTitle(
+      this,
+      pos.center.x,
+      titleY,
+      "Best 5 Records",
+      32
+    ).setOrigin(0.5);
   }
 
-  createTable(dpi) {
+  createTable() {
     const { width, height } = this.getRealSize();
     const isPortrait = height > width;
     const isSmallScreen = width < 480;
@@ -178,347 +137,197 @@ class RecordsScene extends Phaser.Scene {
       }
     }
 
-    this.createTableHeaders(headerY, dpi);
-    this.createTableData(dataStartY, dpi);
+    this.createTableHeaders(headerY);
+    this.createTableData(dataStartY);
   }
 
-  createTableHeaders(headerY, dpi) {
+  createTableHeaders(headerY) {
     const { width } = this.getRealSize();
-    const isPortrait = width < 600;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+    const pos = TextUtils.getResponsivePositions(this);
+
+    const col1X = pos.isPortrait ? width * 0.25 : width * 0.25;
+    const col2X = width * 0.5;
+    const col3X = pos.isPortrait ? width * 0.75 : width * 0.75;
 
     this.headersContainer = this.add.container(0, 0);
 
-    let col1X, col2X, col3X;
-    let fontSize, arrowFontSize;
+    const dateHeader = TextUtils.createTableHeaderText(
+      this,
+      col1X,
+      headerY,
+      pos.isPortrait ? "Date" : "Date & Time",
+      20
+    ).setOrigin(0.5);
 
-    if (isPortrait) {
-      if (isSmallScreen) {
-        fontSize = "16px";
-        arrowFontSize = "12px";
-      } else if (isMediumScreen) {
-        fontSize = "18px";
-        arrowFontSize = "14px";
-      } else {
-        fontSize = "20px";
-        arrowFontSize = "16px";
-      }
-    } else {
-      if (isSmallScreen) {
-        fontSize = "18px";
-        arrowFontSize = "14px";
-      } else if (isMediumScreen) {
-        fontSize = "22px";
-        arrowFontSize = "16px";
-      } else {
-        fontSize = "24px";
-        arrowFontSize = "20px";
-      }
-    }
+    this.headersContainer.add(dateHeader);
 
-    if (isPortrait) {
-      if (isSmallScreen) {
-        col1X = width * 0.2;
-        col2X = width * 0.5;
-        col3X = width * 0.8;
-      } else {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      }
-    } else {
-      if (isSmallScreen) {
-        col1X = width * 0.3;
-        col2X = width * 0.5;
-        col3X = width * 0.7;
-      } else if (isMediumScreen) {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      } else {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      }
-    }
-
-    this.headersContainer.add(
-      this.add
-        .text(col1X, headerY, isPortrait ? "Date" : "Date & Time", {
-          font: `${fontSize} GardenFlower`,
-          fill: "#8B4513",
-          align: "center",
-          resolution: dpi * 2,
-        })
-        .setOrigin(0.5)
-        .setResolution(dpi * 2)
-    );
-
-    const timeHeader = this.add
-      .text(col2X, headerY, isPortrait ? "Time" : "Total Time", {
-        font: `${fontSize} GardenFlower`,
-        fill: this.sortBy === "time" ? "#FFD700" : "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
+    // Заголовок Time (интерактивный)
+    const timeHeader = TextUtils.createTableHeaderText(
+      this,
+      col2X,
+      headerY,
+      pos.isPortrait ? "Time" : "Total Time",
+      20,
+      this.sortBy === "time"
+    )
       .setOrigin(0.5)
-      .setResolution(dpi * 2)
-      .setInteractive();
-
-    timeHeader.on("pointerover", () => {
-      timeHeader.setStyle({ fill: "#FFD700" });
-      this.input.setDefaultCursor("pointer");
-    });
-
-    timeHeader.on("pointerout", () => {
-      timeHeader.setStyle({
-        fill: this.sortBy === "time" ? "#FFD700" : "#8B4513",
+      .setInteractive()
+      .on("pointerover", () => {
+        timeHeader.setStyle({ color: "#FFD700" });
+        this.input.setDefaultCursor("pointer");
+      })
+      .on("pointerout", () => {
+        timeHeader.setStyle({
+          color: this.sortBy === "time" ? "#FFD700" : "#8B4513",
+        });
+        this.input.setDefaultCursor("default");
+      })
+      .on("pointerdown", () => {
+        this.handleSort("time");
       });
-      this.input.setDefaultCursor("default");
-    });
-
-    timeHeader.on("pointerdown", () => {
-      this.handleSort("time");
-    });
 
     this.headersContainer.add(timeHeader);
 
+    // Стрелка сортировки для времени
     if (this.sortBy === "time") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
-      let arrowX;
+      const arrowX = col2X + (pos.isPortrait ? 30 : 60);
 
-      if (isPortrait) {
-        arrowX = isSmallScreen ? col2X + 20 : col2X + 30;
-      } else {
-        arrowX = isSmallScreen
-          ? col2X + 40
-          : isMediumScreen
-          ? col2X + 50
-          : col2X + 60;
-      }
+      const arrowText = TextUtils.createTableHeaderText(
+        this,
+        arrowX,
+        headerY,
+        arrow,
+        16,
+        true
+      ).setOrigin(0.5);
 
-      this.headersContainer.add(
-        this.add
-          .text(arrowX, headerY, arrow, {
-            font: `${arrowFontSize} GardenFlower`,
-            fill: "#FFD700",
-            align: "center",
-            resolution: dpi * 2,
-          })
-          .setOrigin(0.5)
-          .setResolution(dpi * 2)
-      );
+      this.headersContainer.add(arrowText);
     }
 
-    const scoreHeader = this.add
-      .text(col3X, headerY, isPortrait ? "Score" : "Total Score", {
-        font: `${fontSize} GardenFlower`,
-        fill: this.sortBy === "score" ? "#FFD700" : "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
+    // Заголовок Score (интерактивный) - аналогично Time
+    const scoreHeader = TextUtils.createTableHeaderText(
+      this,
+      col3X,
+      headerY,
+      pos.isPortrait ? "Score" : "Total Score",
+      20,
+      this.sortBy === "score"
+    )
       .setOrigin(0.5)
-      .setResolution(dpi * 2)
-      .setInteractive();
-
-    scoreHeader.on("pointerover", () => {
-      scoreHeader.setStyle({ fill: "#FFD700" });
-      this.input.setDefaultCursor("pointer");
-    });
-
-    scoreHeader.on("pointerout", () => {
-      scoreHeader.setStyle({
-        fill: this.sortBy === "score" ? "#FFD700" : "#8B4513",
+      .setInteractive()
+      .on("pointerover", () => {
+        scoreHeader.setStyle({ color: "#FFD700" });
+        this.input.setDefaultCursor("pointer");
+      })
+      .on("pointerout", () => {
+        scoreHeader.setStyle({
+          color: this.sortBy === "score" ? "#FFD700" : "#8B4513",
+        });
+        this.input.setDefaultCursor("default");
+      })
+      .on("pointerdown", () => {
+        this.handleSort("score");
       });
-      this.input.setDefaultCursor("default");
-    });
-
-    scoreHeader.on("pointerdown", () => {
-      this.handleSort("score");
-    });
 
     this.headersContainer.add(scoreHeader);
 
+    // Стрелка для Score
     if (this.sortBy === "score") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
-      let arrowX;
+      const arrowX = col3X + (pos.isPortrait ? 30 : 80);
 
-      if (isPortrait) {
-        arrowX = isSmallScreen ? col3X + 20 : col3X + 30;
-      } else {
-        arrowX = isSmallScreen
-          ? col3X + 50
-          : isMediumScreen
-          ? col3X + 65
-          : col3X + 80;
-      }
+      const arrowText = TextUtils.createTableHeaderText(
+        this,
+        arrowX,
+        headerY,
+        arrow,
+        16,
+        true
+      ).setOrigin(0.5);
 
-      this.headersContainer.add(
-        this.add
-          .text(arrowX, headerY, arrow, {
-            font: `${arrowFontSize} GardenFlower`,
-            fill: "#FFD700",
-            align: "center",
-            resolution: dpi * 2,
-          })
-          .setOrigin(0.5)
-          .setResolution(dpi * 2)
-      );
+      this.headersContainer.add(arrowText);
     }
   }
 
-  createTableData(startY, dpi) {
-    const { width, height } = this.getRealSize();
-    const isPortrait = width < 600;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+  createTableData(startY) {
+    const { width } = this.getRealSize();
+    const pos = TextUtils.getResponsivePositions(this);
 
     if (this.sortedRecords.length === 0) {
-      let noRecordsText, fontSize;
+      const noRecordsText = pos.isPortrait
+        ? "No records yet.\nComplete the game\nto set a record!"
+        : "No records yet.\nComplete the game to set a record!";
 
-      if (isPortrait) {
-        if (isSmallScreen) {
-          noRecordsText =
-            "No records yet.\nComplete the game\nto set a record!";
-          fontSize = "16px";
-        } else {
-          noRecordsText =
-            "No records yet.\nComplete the game\nto set a record!";
-          fontSize = "20px";
-        }
-      } else {
-        if (isSmallScreen) {
-          noRecordsText = "No records yet.\nComplete the game to set a record!";
-          fontSize = "18px";
-        } else if (isMediumScreen) {
-          noRecordsText = "No records yet.\nComplete the game to set a record!";
-          fontSize = "22px";
-        } else {
-          noRecordsText = "No records yet.\nComplete the game to set a record!";
-          fontSize = "24px";
-        }
-      }
+      TextUtils.createModalText(
+        this,
+        pos.center.x,
+        startY + 80,
+        noRecordsText,
+        20
+      )
+        .setOrigin(0.5)
+        .setStyle({ lineSpacing: 8 });
 
-      this.tableContainer.add(
-        this.add
-          .text(width / 2, startY + 80, noRecordsText, {
-            font: `${fontSize} GardenFlower`,
-            fill: "#8B4513",
-            align: "center",
-            lineSpacing: 8,
-            resolution: dpi * 2,
-          })
-          .setOrigin(0.5)
-          .setResolution(dpi * 2)
-      );
       return;
     }
 
-    let col1X, col2X, col3X;
-    let fontSize;
-
-    if (isPortrait) {
-      if (isSmallScreen) {
-        fontSize = "14px";
-      } else if (isMediumScreen) {
-        fontSize = "16px";
-      } else {
-        fontSize = "18px";
-      }
-    } else {
-      if (isSmallScreen) {
-        fontSize = "16px";
-      } else if (isMediumScreen) {
-        fontSize = "20px";
-      } else {
-        fontSize = "24px";
-      }
-    }
-
-    if (isPortrait) {
-      if (isSmallScreen) {
-        col1X = width * 0.2;
-        col2X = width * 0.5;
-        col3X = width * 0.8;
-      } else {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      }
-    } else {
-      if (isSmallScreen) {
-        col1X = width * 0.3;
-        col2X = width * 0.5;
-        col3X = width * 0.7;
-      } else if (isMediumScreen) {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      } else {
-        col1X = width * 0.25;
-        col2X = width * 0.5;
-        col3X = width * 0.75;
-      }
-    }
-
-    let rowHeight;
-    if (isPortrait) {
-      rowHeight = 40;
-    } else {
-      rowHeight = isSmallScreen ? 28 : isMediumScreen ? 32 : 35;
-    }
+    // Позиции колонок
+    const col1X = pos.isPortrait ? width * 0.25 : width * 0.25;
+    const col2X = width * 0.5;
+    const col3X = pos.isPortrait ? width * 0.75 : width * 0.75;
+    const rowHeight = pos.isPortrait ? 40 : 35;
 
     const visibleRecords = this.sortedRecords.slice(0, 5);
 
     visibleRecords.forEach((record, index) => {
       const y = startY + index * rowHeight;
 
-      const formattedDate = isPortrait
+      const formattedDate = pos.isPortrait
         ? this.formatDateShort(record.date)
         : this.formatDate(record.date);
 
-      const dateText = this.add
-        .text(col1X, y, formattedDate, {
-          font: `${fontSize} GardenFlower`,
-          fill: "#8B4513",
-          align: "center",
-          resolution: dpi * 2,
-        })
+      // Дата
+      const dateText = TextUtils.createTableDataText(
+        this,
+        col1X,
+        y,
+        formattedDate,
+        16
+      )
         .setOrigin(0.5)
-        .setResolution(dpi * 2)
         .setAlpha(0);
 
-      const timeText = this.add
-        .text(col2X, y, this.formatTime(record.totalTime), {
-          font: `${fontSize} GardenFlower`,
-          fill: "#8B4513",
-          align: "center",
-          resolution: dpi * 2,
-        })
+      // Время
+      const timeText = TextUtils.createTableDataText(
+        this,
+        col2X,
+        y,
+        this.formatTime(record.totalTime),
+        16
+      )
         .setOrigin(0.5)
-        .setResolution(dpi * 2)
         .setAlpha(0);
 
-      const scoreText = this.add
-        .text(col3X, y, record.totalScore.toString(), {
-          font: `${fontSize} GardenFlower`,
-          fill: "#8B4513",
-          align: "center",
-          resolution: dpi * 2,
-        })
+      // Счет
+      const scoreText = TextUtils.createTableDataText(
+        this,
+        col3X,
+        y,
+        record.totalScore.toString(),
+        16
+      )
         .setOrigin(0.5)
-        .setResolution(dpi * 2)
         .setAlpha(0);
 
       this.tableContainer.add(dateText);
       this.tableContainer.add(timeText);
       this.tableContainer.add(scoreText);
 
+      // Анимация появления
       this.tweens.add({
         targets: [dateText, timeText, scoreText],
         alpha: 1,
-        y: y,
         duration: 300,
         delay: index * 100,
         ease: "Power2",
@@ -526,69 +335,56 @@ class RecordsScene extends Phaser.Scene {
     });
   }
 
-  createClearButton(dpi) {
+  createClearButton() {
     const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+    const pos = TextUtils.getResponsivePositions(this);
 
     let clearButtonX, buttonY, buttonWidth, buttonHeight, fontSize;
 
-    if (isPortrait) {
-      if (isSmallScreen) {
+    if (pos.isPortrait) {
+      if (pos.isSmallScreen) {
         clearButtonX = width * 0.3;
         buttonY = height * 0.7;
         buttonWidth = 80;
         buttonHeight = 35;
-        fontSize = "18px";
-      } else if (isMediumScreen) {
+        fontSize = 18;
+      } else {
         clearButtonX = width * 0.32;
         buttonY = height * 0.7;
         buttonWidth = 90;
         buttonHeight = 40;
-        fontSize = "20px";
-      } else {
-        clearButtonX = width * 0.35;
-        buttonY = height * 0.88;
-        buttonWidth = 100;
-        buttonHeight = 45;
-        fontSize = "22px";
+        fontSize = 20;
       }
     } else {
-      if (isSmallScreen) {
+      if (pos.isSmallScreen) {
         clearButtonX = width * 0.35;
         buttonY = height * 0.7;
         buttonWidth = 80;
         buttonHeight = 35;
-        fontSize = "18px";
-      } else if (isMediumScreen) {
+        fontSize = 18;
+      } else {
         clearButtonX = width * 0.37;
         buttonY = height * 0.72;
         buttonWidth = 90;
         buttonHeight = 40;
-        fontSize = "20px";
-      } else {
-        clearButtonX = width * 0.4;
-        buttonY = height * 0.75;
-        buttonWidth = 100;
-        buttonHeight = 45;
-        fontSize = "22px";
+        fontSize = 20;
       }
     }
 
+    // Создаем фон кнопки (красный для Clear)
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight);
 
-    let button = this.add
-      .text(0, 3, "Clear", {
-        font: `${fontSize} GardenFlower`,
-        fill: "#ffffff",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    // Создаем текст кнопки с помощью TextUtils
+    let button = TextUtils.createButtonText(
+      this,
+      0,
+      3,
+      "Clear",
+      fontSize
+    ).setOrigin(0.5);
 
+    // Создаем контейнер с кнопкой
     let buttonContainer = this.add.container(clearButtonX, buttonY, [
       buttonBg,
       button,
@@ -596,72 +392,64 @@ class RecordsScene extends Phaser.Scene {
     buttonContainer.setSize(buttonWidth, buttonHeight);
     buttonContainer.setInteractive();
 
-    this.setupClearButtonEvents(buttonContainer, buttonBg);
+    this.setupClearButtonEvents(
+      buttonContainer,
+      buttonBg,
+      buttonWidth,
+      buttonHeight
+    );
   }
 
-  createCloseButton(dpi) {
+  createCloseButton() {
     const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    const isSmallScreen = width < 480;
-    const isMediumScreen = width >= 480 && width < 768;
+    const pos = TextUtils.getResponsivePositions(this);
 
     let closeButtonX, buttonY, buttonWidth, buttonHeight, fontSize;
 
-    if (isPortrait) {
-      if (isSmallScreen) {
+    if (pos.isPortrait) {
+      if (pos.isSmallScreen) {
         closeButtonX = width * 0.7;
         buttonY = height * 0.7;
         buttonWidth = 80;
         buttonHeight = 35;
-        fontSize = "18px";
-      } else if (isMediumScreen) {
+        fontSize = 18;
+      } else {
         closeButtonX = width * 0.68;
         buttonY = height * 0.7;
         buttonWidth = 90;
         buttonHeight = 40;
-        fontSize = "20px";
-      } else {
-        closeButtonX = width * 0.65;
-        buttonY = height * 0.88;
-        buttonWidth = 100;
-        buttonHeight = 45;
-        fontSize = "22px";
+        fontSize = 20;
       }
     } else {
-      if (isSmallScreen) {
+      if (pos.isSmallScreen) {
         closeButtonX = width * 0.65;
         buttonY = height * 0.7;
         buttonWidth = 80;
         buttonHeight = 35;
-        fontSize = "18px";
-      } else if (isMediumScreen) {
+        fontSize = 18;
+      } else {
         closeButtonX = width * 0.63;
         buttonY = height * 0.72;
         buttonWidth = 90;
         buttonHeight = 40;
-        fontSize = "20px";
-      } else {
-        closeButtonX = width * 0.6;
-        buttonY = height * 0.75;
-        buttonWidth = 100;
-        buttonHeight = 45;
-        fontSize = "22px";
+        fontSize = 20;
       }
     }
 
+    // Создаем фон кнопки
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
 
-    let button = this.add
-      .text(0, 3, "Close", {
-        font: `${fontSize} GardenFlower`,
-        fill: "#ffffff",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    // Создаем текст кнопки с помощью TextUtils
+    let button = TextUtils.createButtonText(
+      this,
+      0,
+      3,
+      "Close",
+      fontSize
+    ).setOrigin(0.5);
 
+    // Создаем контейнер с кнопкой
     let buttonContainer = this.add.container(closeButtonX, buttonY, [
       buttonBg,
       button,
@@ -669,7 +457,12 @@ class RecordsScene extends Phaser.Scene {
     buttonContainer.setSize(buttonWidth, buttonHeight);
     buttonContainer.setInteractive();
 
-    this.setupCloseButtonEvents(buttonContainer, buttonBg);
+    this.setupCloseButtonEvents(
+      buttonContainer,
+      buttonBg,
+      buttonWidth,
+      buttonHeight
+    );
   }
 
   formatDateShort(dateString) {
@@ -717,7 +510,6 @@ class RecordsScene extends Phaser.Scene {
   }
 
   updateTable() {
-    const dpi = window.devicePixelRatio || 1;
     const { height } = this.getRealSize();
 
     if (this.tableContainer) {
@@ -732,8 +524,8 @@ class RecordsScene extends Phaser.Scene {
     const headerY = height * 0.25;
     const dataStartY = height * 0.35;
 
-    this.createTableHeaders(headerY, dpi);
-    this.createTableData(dataStartY, dpi);
+    this.createTableHeaders(headerY);
+    this.createTableData(dataStartY);
   }
 
   sortRecords(records) {
@@ -777,37 +569,35 @@ class RecordsScene extends Phaser.Scene {
     return `${minutes}m ${remainingSeconds.toString().padStart(2, "0")}s`;
   }
 
-  setupClearButtonEvents(container, buttonBg) {
-    const dpi = window.devicePixelRatio || 1;
-
+  setupClearButtonEvents(container, buttonBg, buttonWidth, buttonHeight) {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xff1744, 100, 45);
+      this.drawButton(buttonBg, 0xff1744, buttonWidth, buttonHeight); // Более яркий красный при hover
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0xdc143c, 100, 45);
+      this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight); // Обычный красный
     });
 
     container.on("pointerdown", () => {
-      this.showClearConfirmation(dpi);
+      this.showClearConfirmation();
     });
   }
 
-  setupCloseButtonEvents(container, buttonBg) {
+  setupCloseButtonEvents(container, buttonBg, buttonWidth, buttonHeight) {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xa0522d, 100, 45);
+      this.drawButton(buttonBg, 0xa0522d, buttonWidth, buttonHeight); // Более светлый коричневый при hover
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0x8b4513, 100, 45);
+      this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight); // Обычный коричневый
     });
 
     container.on("pointerdown", () => {
@@ -815,10 +605,11 @@ class RecordsScene extends Phaser.Scene {
     });
   }
 
-  showClearConfirmation(dpi) {
+  showClearConfirmation() {
     const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
+    const pos = TextUtils.getResponsivePositions(this);
 
+    // Создаем затемняющий оверлей
     const overlay = this.add.rectangle(
       width / 2,
       height / 2,
@@ -828,53 +619,68 @@ class RecordsScene extends Phaser.Scene {
       0.8
     );
 
-    const confirmModal = this.add.graphics();
-
-    const modalWidth = isPortrait ? width * 0.8 : 400;
-    const modalHeight = isPortrait ? height * 0.3 : 200;
+    // Параметры модального окна
+    const modalWidth = pos.isPortrait ? width * 0.8 : 400;
+    const modalHeight = pos.isPortrait ? height * 0.3 : 200;
     const modalX = width / 2 - modalWidth / 2;
     const modalY = height / 2 - modalHeight / 2;
 
+    // Создаем фон модального окна
+    const confirmModal = this.add.graphics();
     confirmModal.fillStyle(0x8b4513, 0.9);
     confirmModal.lineStyle(3, 0xffffff);
     confirmModal.fillRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
     confirmModal.strokeRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
 
-    const confirmText = this.add
-      .text(width / 2, height / 2 - 30, "Clear all records?", {
-        font: isPortrait ? "20px GardenFlower" : "24px GardenFlower",
-        fill: "#ffffff",
-        align: "center",
-        resolution: dpi * 2,
-      })
+    // Создаем текст подтверждения с помощью TextUtils
+    const confirmText = TextUtils.createModalText(
+      this,
+      width / 2,
+      height / 2 - 30,
+      "Clear all records?",
+      pos.isPortrait ? 20 : 24
+    )
       .setOrigin(0.5)
-      .setResolution(dpi * 2);
+      .setStyle({ color: "#ffffff" }); // Белый текст для контраста на темном фоне
 
+    // Позиции кнопок
     const buttonY = height / 2 + 30;
-    const yesButtonX = isPortrait ? width / 2 - 50 : width / 2 - 60;
-    const noButtonX = isPortrait ? width / 2 + 50 : width / 2 + 60;
+    const yesButtonX = pos.isPortrait ? width / 2 - 50 : width / 2 - 60;
+    const noButtonX = pos.isPortrait ? width / 2 + 50 : width / 2 + 60;
 
-    const yesButton = this.add
-      .text(yesButtonX, buttonY, "Yes", {
-        font: "28px GardenFlower",
-        fill: "#FFD700",
-        align: "center",
-        resolution: dpi * 2,
-      })
+    // Создаем кнопки Yes и No с помощью TextUtils
+    const yesButton = TextUtils.createButtonText(
+      this,
+      yesButtonX,
+      buttonY,
+      "Yes",
+      28
+    )
       .setOrigin(0.5)
-      .setResolution(dpi * 2)
+      .setStyle({ color: "#FFD700" }) // Золотой цвет
       .setInteractive();
 
-    const noButton = this.add
-      .text(noButtonX, buttonY, "No", {
-        font: "28px GardenFlower",
-        fill: "#FFD700",
-        align: "center",
-        resolution: dpi * 2,
-      })
+    const noButton = TextUtils.createButtonText(
+      this,
+      noButtonX,
+      buttonY,
+      "No",
+      28
+    )
       .setOrigin(0.5)
-      .setResolution(dpi * 2)
+      .setStyle({ color: "#FFD700" }) // Золотой цвет
       .setInteractive();
+
+    // Обработчики событий для кнопок
+    yesButton.on("pointerover", () => {
+      yesButton.setStyle({ color: "#ffffff" });
+      this.input.setDefaultCursor("pointer");
+    });
+
+    yesButton.on("pointerout", () => {
+      yesButton.setStyle({ color: "#FFD700" });
+      this.input.setDefaultCursor("default");
+    });
 
     yesButton.on("pointerdown", () => {
       overlay.destroy();
@@ -883,6 +689,16 @@ class RecordsScene extends Phaser.Scene {
       yesButton.destroy();
       noButton.destroy();
       this.handleClearRecords();
+    });
+
+    noButton.on("pointerover", () => {
+      noButton.setStyle({ color: "#ffffff" });
+      this.input.setDefaultCursor("pointer");
+    });
+
+    noButton.on("pointerout", () => {
+      noButton.setStyle({ color: "#FFD700" });
+      this.input.setDefaultCursor("default");
     });
 
     noButton.on("pointerdown", () => {

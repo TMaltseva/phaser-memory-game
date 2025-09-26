@@ -11,19 +11,9 @@ class LevelCompleteScene extends Phaser.Scene {
   }
 
   create() {
-    const dpi = this.getImprovedDPI();
     this.createModal();
-    this.createTexts(dpi);
-    this.createButton(dpi);
-  }
-
-  getImprovedDPI() {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const { width, height } = this.getRealSize();
-    const isPortrait = height > width;
-    return isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
+    this.createTexts();
+    this.createButton();
   }
 
   getRealSize() {
@@ -45,70 +35,63 @@ class LevelCompleteScene extends Phaser.Scene {
     modal.setDisplaySize(modalWidth, modalHeight);
   }
 
-  createTexts(dpi) {
-    const { width, height } = this.getRealSize();
+  createTexts() {
+    const pos = TextUtils.getResponsivePositions(this);
 
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    this.add
-      .text(centerX, centerY - 80, this.message, {
-        font: "38px GardenFlower",
-        fill: "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    TextUtils.createModalTitle(
+      this,
+      pos.center.x,
+      pos.center.y - 80,
+      this.message,
+      38
+    ).setOrigin(0.5);
 
     if (!this.isGameComplete) {
-      this.add
-        .text(centerX, centerY - 30, "Level Score: " + this.levelScore, {
-          font: "24px GardenFlower",
-          fill: "#8B4513",
-          align: "center",
-          resolution: dpi * 2,
-        })
-        .setOrigin(0.5)
-        .setResolution(dpi * 2);
+      TextUtils.createModalText(
+        this,
+        pos.center.x,
+        pos.center.y - 30,
+        "Level Score: " + this.levelScore,
+        24
+      ).setOrigin(0.5);
     }
 
-    this.add
-      .text(centerX, centerY + 10, "Total Score: " + this.totalScore, {
-        font: "24px GardenFlower",
-        fill: "#8B4513",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+    TextUtils.createModalText(
+      this,
+      pos.center.x,
+      pos.center.y + 10,
+      "Total Score: " + this.totalScore,
+      24
+    ).setOrigin(0.5);
   }
 
-  createButton(dpi) {
+  createButton() {
     const { width, height } = this.getRealSize();
+    const pos = TextUtils.getResponsivePositions(this);
 
     const centerX = width / 2;
     const centerY = height / 2;
+    const buttonWidth = 200;
+    const buttonHeight = 60;
 
     let buttonBg = this.add.graphics();
-    this.drawButton(buttonBg, 0x8b4513);
+    this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
 
     let buttonText = this.isGameComplete ? "Play Again" : "Next Level";
-    let button = this.add
-      .text(0, 3, buttonText, {
-        font: "28px GardenFlower",
-        fill: "#ffffff",
-        align: "center",
-        resolution: dpi * 2,
-      })
-      .setOrigin(0.5)
-      .setResolution(dpi * 2);
+
+    let button = TextUtils.createButtonText(
+      this,
+      0,
+      3,
+      buttonText,
+      28
+    ).setOrigin(0.5);
 
     let buttonContainer = this.add.container(centerX, centerY + 80, [
       buttonBg,
       button,
     ]);
-    buttonContainer.setSize(200, 60);
+    buttonContainer.setSize(buttonWidth, buttonHeight);
     buttonContainer.setInteractive();
 
     this.setupButtonEvents(buttonContainer, buttonBg);

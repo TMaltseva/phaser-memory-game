@@ -1,5 +1,5 @@
 let config = {
-  type: Phaser.WEBGL,
+  type: Phaser.AUTO,
   pixelArt: false,
   antialias: true,
   roundPixels: false,
@@ -15,14 +15,8 @@ let config = {
   },
   render: {
     antialias: true,
-    roundPixels: true,
-    transparent: false,
-    clearBeforeRender: true,
+    roundPixels: false,
     pixelArt: false,
-    antialiasGL: true,
-    powerPreference: "high-performance",
-    batchSize: 4096,
-    maxTextures: 16,
   },
   currentLevel: 1,
   getLevels: function (isPortrait) {

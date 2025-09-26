@@ -90,21 +90,20 @@ class GameScene extends Phaser.Scene {
   }
 
   showPointsAnimation(points) {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = this.isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
 
-    const pointsText = this.add
-      .text(width / 2, height / 2, "+" + points, {
-        font: "48px GardenFlower",
-        fill: "#FFD700",
+    const pointsText = TextUtils.createText(
+      this,
+      width / 2,
+      height / 2,
+      "+" + points,
+      {
+        fontSize: "48px",
+        color: "#FFD700",
         stroke: "#8B4513",
         strokeThickness: 3,
-      })
-      .setOrigin(0.5, 0.5)
-      .setResolution(dpi * 2);
+      }
+    ).setOrigin(0.5, 0.5);
 
     pointsText.setDepth(1000);
 
@@ -270,49 +269,32 @@ class GameScene extends Phaser.Scene {
   }
 
   createText() {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = this.isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
     const { width, height } = this.getRealSize();
+    const pos = TextUtils.getResponsivePositions(this);
 
-    const fontSize = this.getAdaptiveFontSize(32);
+    this.timeoutText = TextUtils.createGameText(
+      this,
+      pos.sideOffset,
+      pos.topOffset,
+      "Time: 0",
+      32
+    ).setOrigin(0, 0);
 
-    const textStyle = {
-      font: `${fontSize}px GardenFlower`,
-      fill: "#ffffff",
-      resolution: dpi * 2,
-      stroke: "#000000",
-      strokeThickness: 2,
-      shadow: {
-        offsetX: 1,
-        offsetY: 1,
-        color: "#000000",
-        blur: 2,
-        stroke: true,
-        fill: true,
-      },
-    };
+    this.levelText = TextUtils.createGameText(
+      this,
+      pos.sideOffset,
+      pos.topOffset + 40,
+      "Level: 1",
+      32
+    ).setOrigin(0, 0);
 
-    const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 80 : 0;
-    const mobileLeftOffset = this.isPortrait ? 20 : 5;
-
-    this.timeoutText = this.add
-      .text(mobileLeftOffset, 10 + safePadding + mobileTopOffset, "", textStyle)
-      .setResolution(dpi * 2)
-      .setDepth(10);
-
-    this.levelText = this.add
-      .text(mobileLeftOffset, 50 + safePadding + mobileTopOffset, "", textStyle)
-      .setResolution(dpi * 2)
-      .setDepth(10);
-
-    this.scoreText = this.add
-      .text(width / 2, 10 + safePadding + mobileTopOffset, "", textStyle)
-      .setOrigin(0.5, 0)
-      .setResolution(dpi * 2)
-      .setDepth(10);
+    this.scoreText = TextUtils.createGameText(
+      this,
+      pos.center.x,
+      pos.topOffset,
+      "Score: 0",
+      32
+    ).setOrigin(0.5, 0);
 
     this.createRecordsButton();
     this.createAboutButton();
@@ -719,52 +701,27 @@ class GameScene extends Phaser.Scene {
   }
 
   createRecordsButton() {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = this.isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
-    const { width, height } = this.getRealSize();
+    const { width } = this.getRealSize();
+    const pos = TextUtils.getResponsivePositions(this);
 
-    const fontSize = this.getAdaptiveFontSize(32);
-    const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 50 : 0;
-    const mobileLeftOffset = this.isPortrait ? 20 : 5;
+    const buttonX = pos.isPortrait ? width - pos.sideOffset : width - 50;
+    const buttonY = pos.isPortrait ? 120 : 40;
 
-    let buttonX, buttonY;
-
-    if (this.isPortrait) {
-      buttonX = width - mobileLeftOffset;
-      buttonY = 10 + safePadding + mobileTopOffset;
-    } else {
-      buttonX = width - 50;
-      buttonY = 30;
-    }
-
-    this.recordsButton = this.add
-      .text(buttonX, buttonY, "Records", {
-        font: `${fontSize}px GardenFlower`,
-        fill: "#ffffff",
-        resolution: dpi * 2,
-        stroke: "#000000",
-        strokeThickness: 2,
-        shadow: {
-          offsetX: 1,
-          offsetY: 1,
-          color: "#000000",
-          blur: 2,
-          stroke: true,
-          fill: true,
-        },
-      })
+    this.recordsButton = TextUtils.createGameText(
+      this,
+      buttonX,
+      buttonY,
+      "Records",
+      32
+    )
       .setOrigin(1, 0)
-      .setResolution(dpi * 2)
       .setInteractive()
       .on("pointerover", () => {
-        this.recordsButton.setStyle({ fill: "#FFD700" });
+        this.recordsButton.setStyle({ color: "#FFD700" });
         this.input.setDefaultCursor("pointer");
       })
       .on("pointerout", () => {
-        this.recordsButton.setStyle({ fill: "#ffffff" });
+        this.recordsButton.setStyle({ color: "#ffffff" });
         this.input.setDefaultCursor("default");
       })
       .on("pointerdown", () => {
@@ -773,56 +730,30 @@ class GameScene extends Phaser.Scene {
   }
 
   createAboutButton() {
-    const devicePixelRatio = window.devicePixelRatio || 1;
-    const dpi = this.isPortrait
-      ? Math.max(2, Math.min(devicePixelRatio, 4))
-      : Math.max(1, Math.min(devicePixelRatio, 3));
-    const { width, height } = this.getRealSize();
+    const { width } = this.getRealSize();
+    const pos = TextUtils.getResponsivePositions(this);
 
-    const fontSize = this.getAdaptiveFontSize(32);
-    const safePadding = 5;
-    const mobileTopOffset = this.isPortrait ? 50 : 0;
-    const mobileLeftOffset = this.isPortrait ? 20 : 5;
+    const buttonX = pos.isPortrait ? width - pos.sideOffset : width - 190;
+    const buttonY = pos.isPortrait ? 80 : 40;
 
-    let buttonX, buttonY;
-
-    if (this.isPortrait) {
-      buttonX = width - mobileLeftOffset;
-      buttonY = 50 + safePadding + mobileTopOffset;
-    } else {
-      buttonX = width - 190;
-      buttonY = 30;
-    }
-
-    this.aboutButton = this.add
-      .text(buttonX, buttonY, "About", {
-        font: `${fontSize}px GardenFlower`,
-        fill: "#ffffff",
-        resolution: dpi * 2,
-        stroke: "#000000",
-        strokeThickness: 2,
-        shadow: {
-          offsetX: 1,
-          offsetY: 1,
-          color: "#000000",
-          blur: 2,
-          stroke: true,
-          fill: true,
-        },
-      })
+    this.aboutButton = TextUtils.createGameText(
+      this,
+      buttonX,
+      buttonY,
+      "About",
+      32
+    )
       .setOrigin(1, 0)
-      .setResolution(dpi * 2)
       .setInteractive()
       .on("pointerover", () => {
-        this.aboutButton.setStyle({ fill: "#FFD700" });
+        this.aboutButton.setStyle({ color: "#FFD700" });
         this.input.setDefaultCursor("pointer");
       })
       .on("pointerout", () => {
-        this.aboutButton.setStyle({ fill: "#ffffff" });
+        this.aboutButton.setStyle({ color: "#ffffff" });
         this.input.setDefaultCursor("default");
       })
       .on("pointerdown", () => {
-        event.stopPropagation();
         this.showAbout();
       });
   }
