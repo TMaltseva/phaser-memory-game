@@ -161,7 +161,6 @@ class RecordsScene extends Phaser.Scene {
 
     this.headersContainer.add(dateHeader);
 
-    // Заголовок Time (интерактивный)
     const timeHeader = TextUtils.createTableHeaderText(
       this,
       col2X,
@@ -188,7 +187,6 @@ class RecordsScene extends Phaser.Scene {
 
     this.headersContainer.add(timeHeader);
 
-    // Стрелка сортировки для времени
     if (this.sortBy === "time") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
       const arrowX = col2X + (pos.isPortrait ? 30 : 60);
@@ -205,7 +203,6 @@ class RecordsScene extends Phaser.Scene {
       this.headersContainer.add(arrowText);
     }
 
-    // Заголовок Score (интерактивный) - аналогично Time
     const scoreHeader = TextUtils.createTableHeaderText(
       this,
       col3X,
@@ -232,7 +229,6 @@ class RecordsScene extends Phaser.Scene {
 
     this.headersContainer.add(scoreHeader);
 
-    // Стрелка для Score
     if (this.sortBy === "score") {
       const arrow = this.sortOrder === "desc" ? "↓" : "↑";
       const arrowX = col3X + (pos.isPortrait ? 30 : 80);
@@ -272,7 +268,6 @@ class RecordsScene extends Phaser.Scene {
       return;
     }
 
-    // Позиции колонок
     const col1X = pos.isPortrait ? width * 0.25 : width * 0.25;
     const col2X = width * 0.5;
     const col3X = pos.isPortrait ? width * 0.75 : width * 0.75;
@@ -287,7 +282,6 @@ class RecordsScene extends Phaser.Scene {
         ? this.formatDateShort(record.date)
         : this.formatDate(record.date);
 
-      // Дата
       const dateText = TextUtils.createTableDataText(
         this,
         col1X,
@@ -298,7 +292,6 @@ class RecordsScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setAlpha(0);
 
-      // Время
       const timeText = TextUtils.createTableDataText(
         this,
         col2X,
@@ -309,7 +302,6 @@ class RecordsScene extends Phaser.Scene {
         .setOrigin(0.5)
         .setAlpha(0);
 
-      // Счет
       const scoreText = TextUtils.createTableDataText(
         this,
         col3X,
@@ -324,7 +316,6 @@ class RecordsScene extends Phaser.Scene {
       this.tableContainer.add(timeText);
       this.tableContainer.add(scoreText);
 
-      // Анимация появления
       this.tweens.add({
         targets: [dateText, timeText, scoreText],
         alpha: 1,
@@ -371,11 +362,9 @@ class RecordsScene extends Phaser.Scene {
       }
     }
 
-    // Создаем фон кнопки (красный для Clear)
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight);
 
-    // Создаем текст кнопки с помощью TextUtils
     let button = TextUtils.createButtonText(
       this,
       0,
@@ -384,7 +373,6 @@ class RecordsScene extends Phaser.Scene {
       fontSize
     ).setOrigin(0.5);
 
-    // Создаем контейнер с кнопкой
     let buttonContainer = this.add.container(clearButtonX, buttonY, [
       buttonBg,
       button,
@@ -436,11 +424,9 @@ class RecordsScene extends Phaser.Scene {
       }
     }
 
-    // Создаем фон кнопки
     let buttonBg = this.add.graphics();
     this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
 
-    // Создаем текст кнопки с помощью TextUtils
     let button = TextUtils.createButtonText(
       this,
       0,
@@ -449,7 +435,6 @@ class RecordsScene extends Phaser.Scene {
       fontSize
     ).setOrigin(0.5);
 
-    // Создаем контейнер с кнопкой
     let buttonContainer = this.add.container(closeButtonX, buttonY, [
       buttonBg,
       button,
@@ -592,13 +577,13 @@ class RecordsScene extends Phaser.Scene {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xff1744, buttonWidth, buttonHeight); // Более яркий красный при hover
+      this.drawButton(buttonBg, 0xff1744, buttonWidth, buttonHeight);
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight); // Обычный красный
+      this.drawButton(buttonBg, 0xdc143c, buttonWidth, buttonHeight);
     });
 
     container.on("pointerdown", () => {
@@ -610,13 +595,13 @@ class RecordsScene extends Phaser.Scene {
     container.on("pointerover", () => {
       this.input.setDefaultCursor("pointer");
       this.animateButton(container, 1.05);
-      this.drawButton(buttonBg, 0xa0522d, buttonWidth, buttonHeight); // Более светлый коричневый при hover
+      this.drawButton(buttonBg, 0xa0522d, buttonWidth, buttonHeight);
     });
 
     container.on("pointerout", () => {
       this.input.setDefaultCursor("default");
       this.animateButton(container, 1);
-      this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight); // Обычный коричневый
+      this.drawButton(buttonBg, 0x8b4513, buttonWidth, buttonHeight);
     });
 
     container.on("pointerdown", () => {
@@ -628,7 +613,6 @@ class RecordsScene extends Phaser.Scene {
     const { width, height } = this.getRealSize();
     const pos = TextUtils.getResponsivePositions(this);
 
-    // Создаем затемняющий оверлей
     const overlay = this.add.rectangle(
       width / 2,
       height / 2,
@@ -638,20 +622,17 @@ class RecordsScene extends Phaser.Scene {
       0.8
     );
 
-    // Параметры модального окна
     const modalWidth = pos.isPortrait ? width * 0.8 : 400;
     const modalHeight = pos.isPortrait ? height * 0.3 : 200;
     const modalX = width / 2 - modalWidth / 2;
     const modalY = height / 2 - modalHeight / 2;
 
-    // Создаем фон модального окна
     const confirmModal = this.add.graphics();
     confirmModal.fillStyle(0x8b4513, 0.9);
     confirmModal.lineStyle(3, 0xffffff);
     confirmModal.fillRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
     confirmModal.strokeRoundedRect(modalX, modalY, modalWidth, modalHeight, 20);
 
-    // Создаем текст подтверждения с помощью TextUtils
     const confirmText = TextUtils.createModalText(
       this,
       width / 2,
@@ -660,14 +641,12 @@ class RecordsScene extends Phaser.Scene {
       pos.isPortrait ? 20 : 24
     )
       .setOrigin(0.5)
-      .setStyle({ color: "#ffffff" }); // Белый текст для контраста на темном фоне
+      .setStyle({ color: "#ffffff" });
 
-    // Позиции кнопок
     const buttonY = height / 2 + 30;
     const yesButtonX = pos.isPortrait ? width / 2 - 50 : width / 2 - 60;
     const noButtonX = pos.isPortrait ? width / 2 + 50 : width / 2 + 60;
 
-    // Создаем кнопки Yes и No с помощью TextUtils
     const yesButton = TextUtils.createButtonText(
       this,
       yesButtonX,
@@ -676,7 +655,7 @@ class RecordsScene extends Phaser.Scene {
       28
     )
       .setOrigin(0.5)
-      .setStyle({ color: "#FFD700" }) // Золотой цвет
+      .setStyle({ color: "#FFD700" })
       .setInteractive();
 
     const noButton = TextUtils.createButtonText(
@@ -687,10 +666,9 @@ class RecordsScene extends Phaser.Scene {
       28
     )
       .setOrigin(0.5)
-      .setStyle({ color: "#FFD700" }) // Золотой цвет
+      .setStyle({ color: "#FFD700" })
       .setInteractive();
 
-    // Обработчики событий для кнопок
     yesButton.on("pointerover", () => {
       yesButton.setStyle({ color: "#ffffff" });
       this.input.setDefaultCursor("pointer");
