@@ -6,6 +6,8 @@ class GameScene extends Phaser.Scene {
   }
 
   preload() {
+    this.loadingBar = new LoadingBar(this);
+
     this.load.image("background", "assets/sprites/background.png");
     this.load.image(
       "background-portrait",
